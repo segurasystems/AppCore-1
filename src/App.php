@@ -204,7 +204,8 @@ class App
             return $environment;
         };
 
-        $this->setupRedis();
+        $this->setupRedisConfig();
+        $this->setupPredis();
 
         $this->container[\Monolog\Logger::class] = function (Slim\Container $c) {
             /** @var EnvironmentService $environment */
@@ -446,7 +447,7 @@ class App
     {
         if (!$connection) {
             /** @var DbConfig $configs */
-            $dbConfig = App::Instance()->getContainer()->get(\Gone\AppCore\DbConfig::class);
+            $dbConfig = App::Instance()->getContainer()->get(DbConfig::class);
             $configs = $dbConfig->__toArray();
 
             if (isset($configs['Default'])) {
@@ -514,7 +515,7 @@ class App
         };
     }
 
-    public function setupRedis(): void
+    public function setupRedisConfig(): void
     {
         $this->container['RedisConfig'] = function (Slim\Container $c) {
             // Get environment variables.
@@ -546,7 +547,10 @@ class App
             }
             return $redisConfig;
         };
+    }
 
+    public function setupPredis(): void
+    {
         $this->container[\Predis\Client::class] = function (Slim\Container $c) {
             /** @var EnvironmentService $environment */
             $environment = $this->getContainer()->get(EnvironmentService::class);
