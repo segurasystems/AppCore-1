@@ -167,7 +167,37 @@ class App
             return $view;
         };
 
-        $this->setupDBConfig();
+        $this->container[DbConfig::class] = function (Slim\Container $c) {
+            $dbConfig = new DbConfig();
+
+            /** @var EnvironmentService $environment */
+            $environment           = $c->get(EnvironmentService::class);
+            // Lets connect to a database
+            if ($environment->isSet('MYSQL_HOST')) {
+                $databaseConfigurationHost = $environment->get('MYSQL_HOST');
+                if (isset(parse_url($databaseConfigurationHost)['host'])) {
+                    $databaseConfigurationHost = parse_url($databaseConfigurationHost);
+                } else {
+                    $databaseConfigurationHost = [
+                        'host' => $databaseConfigurationHost,
+                        'port' => 3306,
+                    ];
+                }
+
+                $dbConfig->set('Default', [
+                    'driver'   => 'Pdo_Mysql',
+                    'hostname' => gethostbyname($databaseConfigurationHost['host']),
+                    'port'     => isset($databaseConfigurationHost['port']) ? $databaseConfigurationHost['port'] : 3306,
+                    'username' => $environment->get(['MYSQL_USERNAME', 'MYSQL_USER', 'MYSQL_ENV_MYSQL_USER']),
+                    'password' => $environment->get(['MYSQL_PASSWORD', 'MYSQL_ENV_MYSQL_PASSWORD']),
+                    'database' => $environment->get(['MYSQL_DATABASE', 'MYSQL_ENV_MYSQL_DATABASE']),
+                    'charset'  => "UTF8"
+                ]);
+
+                return $dbConfig;
+            }
+            throw new DbConfigException("No Database configuration present, but DatabaseConfig object requested from DI");
+        };
 
         $this->container[\Faker\Generator::class] = function (Slim\Container $c) {
             $faker = FakerFactory::create();
@@ -204,8 +234,47 @@ class App
             return $environment;
         };
 
-        $this->setupRedisConfig();
-        $this->setupPredis();
+        $this->container['RedisConfig'] = function (Slim\Container $c) {
+            // Get environment variables.
+            /** @var EnvironmentService $environment */
+            $environment = $this->getContainer()->get(EnvironmentService::class);
+
+            // Determine where Redis is.
+            if ($environment->isSet('REDIS_PORT')) {
+                $redisConfig = parse_url($environment->get('REDIS_PORT'));
+            } elseif ($environment->isSet('REDIS_HOST')) {
+                $redisConfig = parse_url($environment->get('REDIS_HOST'));
+            } else {
+                $environment->clearCache();
+                throw new \Exception("No REDIS_PORT or REDIS_HOST defined in environment variables, cannot connect to Redis!");
+            }
+
+            // Hack because 'redis' gets interpreted as a path not a host.
+            if (count($redisConfig) == 1 && isset($redisConfig['path'])) {
+                $redisConfig['host'] = $redisConfig['path'];
+                unset($redisConfig['path']);
+            }
+
+            // Allow for overrides
+            if ($environment->isSet('REDIS_OVERRIDE_HOST')) {
+                $redisConfig['host'] = $environment->get('REDIS_OVERRIDE_HOST');
+            }
+            if ($environment->isSet('REDIS_OVERRIDE_PORT')) {
+                $redisConfig['port'] = $environment->get('REDIS_OVERRIDE_PORT');
+            }
+            return $redisConfig;
+        };
+
+        $this->container[\Predis\Client::class] = function (Slim\Container $c) {
+            /** @var EnvironmentService $environment */
+            $environment = $this->getContainer()->get(EnvironmentService::class);
+            $redisConfig = $c->get("RedisConfig");
+            $redisOptions = [];
+            if ($environment->isSet('REDIS_PREFIX')) {
+                $redisOptions['prefix'] = $environment->get('REDIS_PREFIX') . ":";
+            }
+            return new \Predis\Client($redisConfig, $redisOptions);
+        };
 
         $this->container[\Monolog\Logger::class] = function (Slim\Container $c) {
             /** @var EnvironmentService $environment */
@@ -478,88 +547,5 @@ class App
         $environmentService = App::Container()->get(EnvironmentService::class);
 
         $environmentService->rebuildEnvironmentVariables();
-    }
-
-    public function setupDBConfig(): void
-    {
-        $this->container[DbConfig::class] = function (Slim\Container $c) {
-            $dbConfig = new DbConfig();
-
-            /** @var EnvironmentService $environment */
-            $environment           = $c->get(EnvironmentService::class);
-            // Lets connect to a database
-            if ($environment->isSet('MYSQL_HOST')) {
-                $databaseConfigurationHost = $environment->get('MYSQL_HOST');
-                if (isset(parse_url($databaseConfigurationHost)['host'])) {
-                    $databaseConfigurationHost = parse_url($databaseConfigurationHost);
-                } else {
-                    $databaseConfigurationHost = [
-                        'host' => $databaseConfigurationHost,
-                        'port' => 3306,
-                    ];
-                }
-
-                $dbConfig->set('Default', [
-                    'driver'   => 'Pdo_Mysql',
-                    'hostname' => gethostbyname($databaseConfigurationHost['host']),
-                    'port'     => isset($databaseConfigurationHost['port']) ? $databaseConfigurationHost['port'] : 3306,
-                    'username' => $environment->get(['MYSQL_USERNAME', 'MYSQL_USER', 'MYSQL_ENV_MYSQL_USER']),
-                    'password' => $environment->get(['MYSQL_PASSWORD', 'MYSQL_ENV_MYSQL_PASSWORD']),
-                    'database' => $environment->get(['MYSQL_DATABASE', 'MYSQL_ENV_MYSQL_DATABASE']),
-                    'charset'  => "UTF8"
-                ]);
-
-                return $dbConfig;
-            }
-            throw new DbConfigException("No Database configuration present, but DatabaseConfig object requested from DI");
-        };
-    }
-
-    public function setupRedisConfig(): void
-    {
-        $this->container['RedisConfig'] = function (Slim\Container $c) {
-            // Get environment variables.
-            /** @var EnvironmentService $environment */
-            $environment = $this->getContainer()->get(EnvironmentService::class);
-
-            // Determine where Redis is.
-            if ($environment->isSet('REDIS_PORT')) {
-                $redisConfig = parse_url($environment->get('REDIS_PORT'));
-            } elseif ($environment->isSet('REDIS_HOST')) {
-                $redisConfig = parse_url($environment->get('REDIS_HOST'));
-            } else {
-                $environment->clearCache();
-                throw new \Exception("No REDIS_PORT or REDIS_HOST defined in environment variables, cannot connect to Redis!");
-            }
-
-            // Hack because 'redis' gets interpreted as a path not a host.
-            if (count($redisConfig) == 1 && isset($redisConfig['path'])) {
-                $redisConfig['host'] = $redisConfig['path'];
-                unset($redisConfig['path']);
-            }
-
-            // Allow for overrides
-            if ($environment->isSet('REDIS_OVERRIDE_HOST')) {
-                $redisConfig['host'] = $environment->get('REDIS_OVERRIDE_HOST');
-            }
-            if ($environment->isSet('REDIS_OVERRIDE_PORT')) {
-                $redisConfig['port'] = $environment->get('REDIS_OVERRIDE_PORT');
-            }
-            return $redisConfig;
-        };
-    }
-
-    public function setupPredis(): void
-    {
-        $this->container[\Predis\Client::class] = function (Slim\Container $c) {
-            /** @var EnvironmentService $environment */
-            $environment = $this->getContainer()->get(EnvironmentService::class);
-            $redisConfig = $c->get("RedisConfig");
-            $redisOptions = [];
-            if ($environment->isSet('REDIS_PREFIX')) {
-                $redisOptions['prefix'] = $environment->get('REDIS_PREFIX') . ":";
-            }
-            return new \Predis\Client($redisConfig, $redisOptions);
-        };
     }
 }
