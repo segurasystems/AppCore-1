@@ -329,6 +329,20 @@ class Route
         return $this;
     }
 
+    public function setPropertyData(array $propertyData){
+        $this->propertyData = [];
+        $this->properties = [];
+        $this->propertyOptions = [];
+        foreach ($propertyData as $name => $data) {
+            $this->properties[] = $name;
+            if(!empty($data["options"])){
+                $this->propertyOptions[$name] = $data["options"];
+            }
+            $this->propertyData[$name] = $data;
+        }
+        return $this;
+    }
+
     /**
      * @return mixed
      */
