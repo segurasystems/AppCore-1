@@ -2,8 +2,7 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\AppCore\Controllers\InlineCssTrait;
-use Gone\AppCore\Exceptions\FilterDecodeException;
-use Gone\AppCore\Filters\Filter;
+use Gone\SDK\Common\Filters\Filter;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -97,18 +96,14 @@ abstract class Controller
     }
 
     /**
-     * Parse filters header into filter objects.
-     *
      * @param Request  $request
      * @param Response $response
      *
      * @return Filter
+     * @throws \Gone\SDK\Common\Exceptions\FilterDecodeException
      */
     protected function parseFilters(Request $request, Response $response) : Filter
     {
-        $filter = new Filter();
-        $filter->parseFromHeader(json_decode($request->getHeader('Filter')[0], true));
-
-        return $filter;
+        return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
     }
 }
