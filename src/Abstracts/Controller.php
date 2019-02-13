@@ -70,6 +70,17 @@ abstract class Controller
         );
     }
 
+    public function jsonFailureResponse(string $message,Request $request ,Response $response){
+        return $this->jsonResponse(
+            [
+                'Status' => 'Fail',
+                'Reason' => $message,
+            ],
+            $request,
+            $response
+        );
+    }
+
     /**
      * Decide if a request has a filter attached to it.
      *
