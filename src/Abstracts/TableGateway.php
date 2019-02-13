@@ -1,6 +1,7 @@
 <?php
 namespace Gone\AppCore\Abstracts;
 
+use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\Filters\FilterCondition;
 use Gone\AppCore\ZendSql;
 use Gone\SDK\Common\Filters\FilterJoin;
@@ -139,6 +140,22 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
+     * @param Filter $filter
+     *
+     * @return array
+     */
+    public function fetchAllFilter(Filter $filter){
+        return $this->fetchAll(
+            $filter->getLimit(),
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
+    }
+
+    /**
      * This method is only supposed to be used by getListAction.
      *
      * @param int|null                  $limit      Number to limit to
@@ -245,6 +262,14 @@ abstract class TableGateway extends ZendTableGateway
         $total = (int)$row['total'];
 
         return [$resultSet, $total];
+    }
+
+    public function fetchDistinctFilter(string $distinctColumn,Filter $filter){
+        return $this->fetchDistinct(
+            $distinctColumn,
+            $filter->getWheres(),
+            $filter->getJoins()
+        );
     }
 
     /**
