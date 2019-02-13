@@ -142,6 +142,48 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param Filter $filter
      *
+     * @return Model|null
+     */
+    public function fetchFilter(
+        Filter $filter
+    ): ?Model
+    {
+        return $this->fetch(
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
+    }
+
+    /**
+     * @param int|null $offset
+     * @param array    $wheres
+     * @param null     $order
+     * @param string   $direction
+     * @param array    $joins
+     *
+     * @return Model|null
+     */
+    public function fetch(
+        int $offset = null,
+        array $wheres = [],
+        $order = null,
+        string $direction = Select::ORDER_ASCENDING,
+        array $joins = []
+    ): ?Model
+    {
+        $res = $this->fetchAll(1,$offset,$wheres,$order,$direction,$joins);
+        if($res[1] == 1){
+            return $res[0]->current();
+        }
+        return null;
+    }
+
+    /**
+     * @param Filter $filter
+     *
      * @return array
      */
     public function fetchAllFilter(Filter $filter){
