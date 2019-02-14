@@ -1,4 +1,5 @@
 <?php
+
 namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Filters\Filter;
@@ -18,10 +19,11 @@ use Zend\Db\TableGateway\TableGateway as ZendTableGateway;
 abstract class TableGateway extends ZendTableGateway
 {
     protected $model;
+
     public function __construct($table, AdapterInterface $adapter, $features = null, $resultSetPrototype = null, $sql = null)
     {
         $this->adapter = $adapter;
-        $this->table   = $table;
+        $this->table = $table;
 
         if (!$sql) {
             $sql = new ZendSql($this->adapter, $this->table);
@@ -146,8 +148,7 @@ abstract class TableGateway extends ZendTableGateway
      */
     public function fetchFilter(
         Filter $filter
-    ): ?Model
-    {
+    ): ?Model {
         return $this->fetch(
             $filter->getOffset(),
             $filter->getWheres(),
@@ -172,13 +173,22 @@ abstract class TableGateway extends ZendTableGateway
         $order = null,
         string $direction = Select::ORDER_ASCENDING,
         array $joins = []
-    ): ?Model
-    {
-        list($matches, $count) = $this->fetchAll(1,$offset,$wheres,$order,$direction,$joins);
-        if($count == 1){
-            return $matches->current();
+    ): ?Model {
+
+        $select = $this->getSql()->select();
+        $select->limit(1);
+        if (is_numeric($offset)) {
+            $select->offset($offset);
         }
-        return null;
+        $select = $this->addJoinsToSelect($select, $joins);
+        $select = $this->addWheresToSelect($select, $wheres);
+        $select = $this->addOrdering($select, $order, $direction);
+
+        $resultSet = $this->selectWith($select);
+        if (count($resultSet) === 0) {
+            return null;
+        }
+        return $resultSet->current();
     }
 
     /**
@@ -186,7 +196,8 @@ abstract class TableGateway extends ZendTableGateway
      *
      * @return array
      */
-    public function fetchAllFilter(Filter $filter){
+    public function fetchAllFilter(Filter $filter)
+    {
         return $this->fetchAll(
             $filter->getLimit(),
             $filter->getOffset(),
@@ -200,12 +211,12 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * This method is only supposed to be used by getListAction.
      *
-     * @param int|null                  $limit      Number to limit to
-     * @param int|null                  $offset     Offset of limit statement. Is ignored if limit not set.
-     * @param array                     $wheres     Array of conditions to filter by.
-     * @param string|Expression|null    $order      Column to order on
-     * @param string|null               $direction  Direction to order on (SELECT::ORDER_ASCENDING|SELECT::ORDER_DESCENDING)
-     * @param array                     $joins      Array of join objects for joining tables in query
+     * @param int|null               $limit     Number to limit to
+     * @param int|null               $offset    Offset of limit statement. Is ignored if limit not set.
+     * @param array                  $wheres    Array of conditions to filter by.
+     * @param string|Expression|null $order     Column to order on
+     * @param string|null            $direction Direction to order on (SELECT::ORDER_ASCENDING|SELECT::ORDER_DESCENDING)
+     * @param array                  $joins     Array of join objects for joining tables in query
      *
      * @return array [ResultSet,int] Returns an array of resultSet,total_found_rows
      */
@@ -258,7 +269,8 @@ abstract class TableGateway extends ZendTableGateway
         return [$resultSet, $total];
     }
 
-    public function fetchDistinctFilter(string $distinctColumn,Filter $filter){
+    public function fetchDistinctFilter(string $distinctColumn, Filter $filter)
+    {
         return $this->fetchDistinct(
             $distinctColumn,
             $filter->getWheres(),
@@ -269,9 +281,9 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * This method is only supposed to be used by getListAction.
      *
-     * @param string    $distinctColumn    Column to be distinct on.
-     * @param array     $wheres            Array of conditions to filter by.
-     * @param array     $joins             Array of join objects for joining tables in query
+     * @param string $distinctColumn Column to be distinct on.
+     * @param array  $wheres         Array of conditions to filter by.
+     * @param array  $joins          Array of join objects for joining tables in query
      *
      * @return array [ResultSet,int] Returns an array of resultSet,total_found_rows
      */
@@ -366,7 +378,7 @@ abstract class TableGateway extends ZendTableGateway
         $select = $this->addWheresToSelect($select, $wheres);
 
         #\Kint::dump($this->getSql()->getSqlStringForSqlObject($select));
-        
+
         $row = $this->getSql()
             ->prepareStatementForSqlObject($select)
             ->execute()
@@ -429,7 +441,7 @@ abstract class TableGateway extends ZendTableGateway
                 ->execute()
                 ->current();
 
-            $highestPrimaryKey               = !is_null($row) ? $row['max'] : 0;
+            $highestPrimaryKey = !is_null($row) ? $row['max'] : 0;
             $highestPrimaryKeys[$primaryKey] = $highestPrimaryKey;
         }
         return $highestPrimaryKeys;
@@ -451,7 +463,7 @@ abstract class TableGateway extends ZendTableGateway
                 ->execute()
                 ->current();
 
-            $highestAutoIncrementKey                     = !is_null($row) ? $row['max'] : 0;
+            $highestAutoIncrementKey = !is_null($row) ? $row['max'] : 0;
             $highestAutoIncrementKeys[$autoIncrementKey] = $highestAutoIncrementKey;
         }
         return $highestAutoIncrementKeys;
@@ -470,7 +482,7 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param $field
      * @param $value
-     * @param $orderBy string Field to sort by
+     * @param $orderBy        string Field to sort by
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      *
      * @return array|\ArrayObject|null
@@ -496,10 +508,10 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param string $field
-     * @param $value
-     * @param $limit int
-     * @param $orderBy string Field to sort by
-     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
+     * @param        $value
+     * @param        $limit          int
+     * @param        $orderBy        string Field to sort by
+     * @param        $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      *
      * @return array|\ArrayObject|null
      */
@@ -523,11 +535,11 @@ abstract class TableGateway extends ZendTableGateway
             return null;
         }
         for ($i = 0; $i < $resultSet->count(); $i++) {
-            $row       = $resultSet->current();
+            $row = $resultSet->current();
             $results[] = $row;
             $resultSet->next();
         }
-        
+
         return $results;
     }
 
@@ -539,7 +551,7 @@ abstract class TableGateway extends ZendTableGateway
             new Expression('COUNT(*) as count')
         ]);
         $statement = $this->sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         $data = $result->current();
 
@@ -593,7 +605,7 @@ abstract class TableGateway extends ZendTableGateway
      * @param Where|\Closure|string|array|Predicate\PredicateInterface $keyValue
      * @param null                                                     $orderBy
      * @param string                                                   $orderDirection
-     * @param int                                                  $limit
+     * @param int                                                      $limit
      *
      * @return array|\ArrayObject|null
      */
@@ -614,11 +626,11 @@ abstract class TableGateway extends ZendTableGateway
             return null;
         }
         for ($i = 0; $i < $resultSet->count(); $i++) {
-            $row       = $resultSet->current();
+            $row = $resultSet->current();
             $results[] = $row;
             $resultSet->next();
         }
-        
+
         return $results;
     }
 
@@ -641,7 +653,7 @@ abstract class TableGateway extends ZendTableGateway
     public function getBySelect(Select $select)
     {
         $resultSet = $this->executeSelect($select);
-        $return    = [];
+        $return = [];
         foreach ($resultSet as $result) {
             $return[] = $result;
         }
@@ -656,7 +668,7 @@ abstract class TableGateway extends ZendTableGateway
     public function getBySelectRaw(Select $select)
     {
         $resultSet = $this->executeSelect($select);
-        $return    = [];
+        $return = [];
         while ($result = $resultSet->getDataSource()->current()) {
             $return[] = $result;
             $resultSet->getDataSource()->next();
@@ -686,10 +698,8 @@ abstract class TableGateway extends ZendTableGateway
         foreach ($wheres as $conditional) {
             if (
                 $conditional instanceof \Closure
-                ||
-                $conditional instanceof Where
-                ||
-                $conditional instanceof PredicateInterface
+                || $conditional instanceof Where
+                || $conditional instanceof PredicateInterface
             ) {
                 $select->where($conditional);
             } else {
@@ -745,6 +755,25 @@ abstract class TableGateway extends ZendTableGateway
     {
         foreach ($joins as $join) {
             $select->join($join["table"], $join["on"], $join["columns"], $join["type"]);
+        }
+        return $select;
+    }
+
+    /**
+     * @param Select $select
+     * @param        $order
+     * @param        $direction
+     *
+     * @return Select
+     */
+    private function addOrdering(Select $select, $order, $direction): Select
+    {
+        if ($order !== null) {
+            if ($order instanceof Expression) {
+                $select->order($order);
+            } else {
+                $select->order("{$order} {$direction}");
+            }
         }
         return $select;
     }
