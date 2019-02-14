@@ -13,7 +13,29 @@ abstract class Service
 
     abstract public function getTermSingular() : string;
 
+    /**
+     * @return TableGateway
+     */
     abstract public function getNewTableGatewayInstance();
+
+    /**
+     * @param int|null    $offset
+     * @param array       $wheres
+     * @param null        $order
+     * @param string|null $orderDirection
+     * @param array       $joins
+     *
+     * @return Model|null
+     */
+    public function get(
+        int $offset = null,
+        array $wheres = [],
+        $order = null,
+        string $orderDirection = null,
+        array $joins = []){
+        $tableGateway = $this->getNewTableGatewayInstance();
+        return $tableGateway->fetch($offset,$wheres,$order,$orderDirection,$joins);
+    }
 
     /**
      * @param int|null               $limit
