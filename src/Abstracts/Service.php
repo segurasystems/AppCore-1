@@ -27,9 +27,10 @@ abstract class Service
     public function getAll(
         int $limit = null,
         int $offset = null,
-        array $wheres = null,
+        array $wheres = [],
         $order = null,
-        string $orderDirection = null
+        string $orderDirection = null,
+        array $joins = []
     ) {
         /** @var TableGateway $tableGateway */
         $tableGateway              = $this->getNewTableGatewayInstance();
@@ -38,7 +39,8 @@ abstract class Service
             $offset,
             $wheres,
             $order,
-            $orderDirection !== null ? $orderDirection : Select::ORDER_ASCENDING
+            $orderDirection !== null ? $orderDirection : Select::ORDER_ASCENDING,
+            $joins
         );
         $return = [];
 
@@ -53,18 +55,21 @@ abstract class Service
     /**
      * @param string|null           $distinctColumn
      * @param array|\Closure[]|null $wheres
+     * @param array|                $joins
      *
      * @return Model[]
      */
     public function getDistinct(
         string $distinctColumn,
-        array $wheres = null
+        array $wheres = [],
+        array $joins = []
     ) {
         /** @var TableGateway $tableGateway */
         $tableGateway = $this->getNewTableGatewayInstance();
         list($matches, $count) = $tableGateway->fetchDistinct(
             $distinctColumn,
-            $wheres
+            $wheres,
+            $joins
         );
 
         $return = [];
@@ -78,14 +83,16 @@ abstract class Service
 
     /**
      * @param array|\Closure[]|null $wheres
+     * @param array                 $joins
      *
      * @return int
      */
     public function countAll(
-        array $wheres = null
+        array $wheres = null,
+        array $joins = []
     ) {
         /** @var TableGateway $tableGateway */
         $tableGateway              = $this->getNewTableGatewayInstance();
-        return $tableGateway->getCount($wheres);
+        return $tableGateway->getCount($wheres,$joins);
     }
 }
