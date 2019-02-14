@@ -11,15 +11,17 @@ interface ServiceInterface
      * @param array|null         $wheres
      * @param string|Expression| null $order
      * @param string|null        $orderDirection
+     * @param array|null         $joins
      *
      * @return ModelInterface[]
      */
     public function getAll(
         int $limit = null,
         int $offset = null,
-        array $wheres = null,
+        array $wheres = [],
         $order = null,
-        string $orderDirection = null
+        string $orderDirection = null,
+        array $joins = []
     );
 
     public function getById(int $id);
