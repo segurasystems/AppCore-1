@@ -15,7 +15,6 @@ interface ServiceInterface
      * @return ModelInterface|null
      */
     public function get(
-        int $limit = null,
         int $offset = null,
         array $wheres = [],
         $order = null,
