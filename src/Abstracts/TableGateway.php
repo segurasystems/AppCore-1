@@ -174,9 +174,9 @@ abstract class TableGateway extends ZendTableGateway
         array $joins = []
     ): ?Model
     {
-        $res = $this->fetchAll(1,$offset,$wheres,$order,$direction,$joins);
-        if($res[1] == 1){
-            return $res[0]->current();
+        list($matches, $count) = $this->fetchAll(1,$offset,$wheres,$order,$direction,$joins);
+        if($count == 1){
+            return $matches->current();
         }
         return null;
     }
@@ -227,56 +227,8 @@ abstract class TableGateway extends ZendTableGateway
             }
         }
 
-        foreach ($joins as $join){
-            $select->join($join["table"],$join["on"],$join["columns"],$join["type"]);
-        }
-
-        //\Kint::dump($limit, $offset, $wheres, $order, $direction);
-        foreach ($wheres as $conditional) {
-            if ($conditional instanceof \Closure) {
-                $select->where($conditional);
-            } else {
-                $spec = function (Where $where) use ($conditional) {
-                    switch ($conditional['condition']) {
-                        case FilterCondition::CONDITION_EQUAL:
-                            $where->equalTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_NOT_EQUAL:
-                            $where->notEqualTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_GREATER_THAN:
-                            $where->greaterThan($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_GREATER_THAN_OR_EQUAL:
-                            $where->greaterThanOrEqualTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_LESS_THAN:
-                            $where->lessThan($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_LESS_THAN_OR_EQUAL:
-                            $where->lessThanOrEqualTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_LIKE:
-                            $where->like($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_NOT_LIKE:
-                            $where->notLike($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_IN:
-                            $where->in($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_NOT_IN:
-                            $where->notIn($conditional['column'], $conditional['value']);
-                            break;
-
-                        default:
-                            // @todo better exception plz.
-                            throw new \Exception("Cannot work out what conditional '{$conditional['condition']}'' is supposed to do in Zend... Probably unimplemented?");
-                    }
-                };
-                $select->where($spec);
-            }
-        }
+        $select = $this->addJoinsToSelect($select, $joins);
+        $select = $this->addWheresToSelect($select, $wheres);
 
         if ($order !== null) {
             if ($order instanceof Expression) {
@@ -333,43 +285,8 @@ abstract class TableGateway extends ZendTableGateway
         $select->quantifier(Select::QUANTIFIER_DISTINCT);
         $select->columns([$distinctColumn]);
 
-        foreach ($joins as $join){
-            $select->join($join["table"],$join["on"],$join["columns"],$join["type"]);
-        }
-
-        //\Kint::dump($distinctColumn, $wheres);
-        foreach ($wheres as $conditional) {
-            if ($conditional instanceof \Closure) {
-                $select->where($conditional);
-            } else {
-                $spec = function (Where $where) use ($conditional) {
-                    switch ($conditional['condition']) {
-                        case FilterCondition::CONDITION_EQUAL:
-                            $where->equalTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_GREATER_THAN:
-                            $where->greaterThan($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_GREATER_THAN_OR_EQUAL:
-                            $where->greaterThanOrEqualTo($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_LESS_THAN:
-                            $where->lessThan($conditional['column'], $conditional['value']);
-                            break;
-                        case FilterCondition::CONDITION_LESS_THAN_OR_EQUAL:
-                            $where->lessThanOrEqualTo($conditional['column'], $conditional['value']);
-                            break;#
-                        case FilterCondition::CONDITION_LIKE:
-                            $where->like($conditional['column'], $conditional['value']);
-                            break;
-                        default:
-                            // @todo better exception plz.
-                            throw new \Exception("Cannot work out what conditional {$conditional['condition']} is supposed to do in Zend... Probably unimplemented?");
-                    }
-                };
-                $select->where($spec);
-            }
-        }
+        $select = $this->addJoinsToSelect($select, $joins);
+        $select = $this->addWheresToSelect($select, $wheres);
 
         $resultSet = $this->selectWith($select);
 
@@ -440,15 +357,13 @@ abstract class TableGateway extends ZendTableGateway
      *
      * @return int
      */
-    public function getCount($wheres = [])
+    public function getCount($wheres = [], $joins = [])
     {
         $select = $this->getSql()->select();
         $select->columns(['total' => new Expression('IFNULL(COUNT(*),0)')]);
-        if (count($wheres) > 0) {
-            foreach ($wheres as $where) {
-                $select->where($where);
-            }
-        }
+
+        $select = $this->addJoinsToSelect($select, $joins);
+        $select = $this->addWheresToSelect($select, $wheres);
 
         #\Kint::dump($this->getSql()->getSqlStringForSqlObject($select));
         
@@ -463,18 +378,18 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param string                       $field
      * @param Where[]|PredicateInterface[] $wheres
+     * @param Where[]|PredicateInterface[] $wheres
      *
      * @return int
      */
-    public function getCountUnique(string $field, $wheres = [])
+    public function getCountUnique(string $field, $wheres = [], $joins = [])
     {
         $select = $this->getSql()->select();
         $select->columns(['total' => new Expression('DISTINCT ' . $field)]);
-        if (count($wheres) > 0) {
-            foreach ($wheres as $where) {
-                $select->where($where);
-            }
-        }
+
+
+        $select = $this->addJoinsToSelect($select, $joins);
+        $select = $this->addWheresToSelect($select, $wheres);
 
         $row = $this->getSql()
             ->prepareStatementForSqlObject($select)
@@ -758,5 +673,79 @@ abstract class TableGateway extends ZendTableGateway
         $modelName = end($modelName);
         $modelName = str_replace("Model", "", $modelName);
         return $modelName;
+    }
+
+    /**
+     * @param array  $wheres
+     * @param Select $select
+     *
+     * @return Select
+     */
+    private function addWheresToSelect(Select $select, array $wheres = []): Select
+    {
+        foreach ($wheres as $conditional) {
+            if (
+                $conditional instanceof \Closure
+                ||
+                $conditional instanceof Where
+                ||
+                $conditional instanceof PredicateInterface
+            ) {
+                $select->where($conditional);
+            } else {
+                $spec = function (Where $where) use ($conditional) {
+                    switch ($conditional['condition']) {
+                        case FilterCondition::CONDITION_EQUAL:
+                            $where->equalTo($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_NOT_EQUAL:
+                            $where->notEqualTo($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_GREATER_THAN:
+                            $where->greaterThan($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_GREATER_THAN_OR_EQUAL:
+                            $where->greaterThanOrEqualTo($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_LESS_THAN:
+                            $where->lessThan($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_LESS_THAN_OR_EQUAL:
+                            $where->lessThanOrEqualTo($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_LIKE:
+                            $where->like($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_NOT_LIKE:
+                            $where->notLike($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_IN:
+                            $where->in($conditional['column'], $conditional['value']);
+                            break;
+                        case FilterCondition::CONDITION_NOT_IN:
+                            $where->notIn($conditional['column'], $conditional['value']);
+                            break;
+
+                        default:
+                            // @todo better exception plz.
+                            throw new \Exception("Cannot work out what conditional '{$conditional['condition']}'' is supposed to do in Zend... Probably unimplemented?");
+                    }
+                };
+                $select->where($spec);
+            }
+        }
+        return $select;
+    }
+
+    /**
+     * @param array  $joins
+     * @param Select $select
+     */
+    private function addJoinsToSelect(Select $select, array $joins = []): Select
+    {
+        foreach ($joins as $join) {
+            $select->join($join["table"], $join["on"], $join["columns"], $join["type"]);
+        }
+        return $select;
     }
 }
