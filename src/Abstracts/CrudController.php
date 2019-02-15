@@ -14,13 +14,7 @@ abstract class CrudController extends Controller
         $service = $this->getService();
         if ($this->requestHasFilters($request, $response)) {
             $filterBehaviours = $this->parseFilters($request, $response);
-            $foundObjects     = $service->getAll(
-                $filterBehaviours->getLimit(),
-                $filterBehaviours->getOffset(),
-                $filterBehaviours->getWheres(),
-                $filterBehaviours->getOrder(),
-                $filterBehaviours->getOrderDirection()
-            );
+            $foundObjects     = $service->getAllFilter($filterBehaviours);
         } else {
             $foundObjects = $service->getAll();
         }
