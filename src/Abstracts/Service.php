@@ -1,6 +1,7 @@
 <?php
 namespace Gone\AppCore\Abstracts;
 
+use Gone\SDK\Common\Filters\Filter;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
@@ -19,6 +20,21 @@ abstract class Service
     abstract public function getNewTableGatewayInstance();
 
     /**
+     * @param Filter    $filter
+     *
+     * @return Model|null
+     */
+    public function getFilter(Filter $filter){
+        return $this->get(
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
+    }
+
+    /**
      * @param int|null    $offset
      * @param array       $wheres
      * @param null        $order
@@ -35,6 +51,22 @@ abstract class Service
         array $joins = []){
         $tableGateway = $this->getNewTableGatewayInstance();
         return $tableGateway->fetch($offset,$wheres,$order,$orderDirection,$joins);
+    }
+
+    /**
+     * @param Filter $filter
+     *
+     * @return Model[]
+     */
+    public function getAllFilter(Filter $filter){
+        return $this->getAll(
+            $filter->getLimit(),
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
     }
 
     /**
