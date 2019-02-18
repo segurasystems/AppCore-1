@@ -23,9 +23,8 @@ abstract class CrudController extends Controller
             $objects[] = $object->__toPublicArray();
         }
 
-        return $this->jsonResponse(
+        return $this->jsonSuccessResponse(
             [
-                'Status'                        => 'Okay',
                 'Action'                        => 'LIST',
                 $this->service->getTermPlural() => $objects,
             ],
@@ -38,9 +37,8 @@ abstract class CrudController extends Controller
     {
         $object = $this->getService()->getById($args['id']);
         if ($object) {
-            return $this->jsonResponse(
+            return $this->jsonSuccessResponse(
                 [
-                    'Status'                          => 'Okay',
                     'Action'                          => 'GET',
                     $this->service->getTermSingular() => $object->__toArray(),
                 ],
@@ -48,18 +46,15 @@ abstract class CrudController extends Controller
                 $response
             );
         }
-        return $this->jsonResponse(
-                [
-                    'Status'                          => 'Fail',
-                    'Reason'                          => sprintf(
-                        "No such %s found with id %s",
-                        strtolower($this->service->getTermSingular()),
-                        $args['id']
-                    )
-                ],
-                $request,
-                $response
-            );
+        return $this->jsonFailureResponse(
+            sprintf(
+                "No such %s found with id %s",
+                strtolower($this->service->getTermSingular()),
+                $args['id']
+            ),
+            $request,
+            $response
+        );
     }
 
     public function createRequest(Request $request, Response $response, $args) : Response
@@ -67,9 +62,8 @@ abstract class CrudController extends Controller
         $newObjectArray = $request->getParsedBody();
         try {
             $object = $this->getService()->createFromArray($newObjectArray);
-            return $this->jsonResponse(
+            return $this->jsonSuccessResponse(
                 [
-                    'Status'                          => 'Okay',
                     'Action'                          => 'CREATE',
                     $this->service->getTermSingular() => $object->__toArray(),
                 ],
@@ -89,9 +83,8 @@ abstract class CrudController extends Controller
             $array = $object->__toArray();
             $object->destroy();
 
-            return $this->jsonResponse(
+            return $this->jsonSuccessResponse(
                 [
-                    'Status'                          => 'Okay',
                     'Action'                          => 'DELETE',
                     $this->service->getTermSingular() => $array,
                 ],
@@ -99,17 +92,14 @@ abstract class CrudController extends Controller
                 $response
             );
         }
-        return $this->jsonResponse(
-                [
-                    'Status'                          => 'Fail',
-                    'Reason'                          => sprintf(
-                        "No such %s found with id %s",
-                        strtolower($this->service->getTermSingular()),
-                        $args['id']
-                    )
-                ],
-                $request,
-                $response
-            );
+        return $this->jsonFailureResponse(
+            sprintf(
+                "No such %s found with id %s",
+                strtolower($this->service->getTermSingular()),
+                $args['id']
+            ),
+            $request,
+            $response
+        );
     }
 }
