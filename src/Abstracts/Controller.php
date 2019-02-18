@@ -81,6 +81,14 @@ abstract class Controller
         );
     }
 
+    public function jsonSuccessResponse(array $data,Request $request ,Response $response){
+        return $this->jsonResponse(
+            array_merge(['Status' => 'Okay'],$data),
+            $request,
+            $response
+        );
+    }
+
     /**
      * Decide if a request has a filter attached to it.
      *
