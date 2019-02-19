@@ -5,10 +5,10 @@ namespace Gone\AppCore\Traits;
 trait SoftDeleteModelTrait
 {
     protected $softDeleteField = "Deleted";
-    protected $softDeleteDateField = null;
+    protected $softDeleteDateField = "DateDeleted";
     protected $softDeleteDateFormat = "Y-m-d H:i:s";
-    protected $softDelete_deleted = true;
-    protected $softDelete_undeleted = false;
+    protected $softDelete_deleted = "yes";
+    protected $softDelete_undeleted = "no";
 
     public function destroy(){
         $this->delete();
