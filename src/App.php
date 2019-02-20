@@ -1,6 +1,7 @@
 <?php
 namespace Gone\AppCore;
 
+use function Clue\StreamFilter\fun;
 use DebugBar\Bridge\MonologCollector;
 use DebugBar\DebugBar;
 use DebugBar\StandardDebugBar;
@@ -274,6 +275,10 @@ class App
                 $redisOptions['prefix'] = $environment->get('REDIS_PREFIX') . ":";
             }
             return new \Predis\Client($redisConfig, $redisOptions);
+        };
+
+        $this->container[Slim\Http\Request::class] = function (Slim\Container $c) {
+            return $c->get("request");
         };
 
         $this->container[\Monolog\Logger::class] = function (Slim\Container $c) {
