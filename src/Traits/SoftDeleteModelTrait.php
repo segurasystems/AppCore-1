@@ -10,8 +10,9 @@ trait SoftDeleteModelTrait
     protected $softDelete_deleted = "yes";
     protected $softDelete_undeleted = "no";
 
-    public function destroy(){
+    public function destroy(): int {
         $this->delete();
+        return 1;
     }
 
     public function delete()
