@@ -32,6 +32,8 @@ class ApiListController extends Controller
                     'access'             => $route->getAccess(),
                     'example'            => $route->getExampleEntity() ? $route->getExampleEntity()->__toArray() : null,
                     'callbackProperties' => $route->getCallbackProperties(),
+                    'modelSafeMethod'    => $route->getSDKModelSafe(),
+                    'hydratable'         => $route->getSDKHydrate(),
                 ];
 
                 $json['Routes'][] = array_filter($routeArray);

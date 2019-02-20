@@ -13,6 +13,8 @@ class Route
     protected $SDKClass;
     protected $SDKFunction;
     protected $SDKTemplate = "callback";
+    protected $SDKModelSafe = false;
+    protected $SDKHydrate = false;
     protected $routerPattern;
     protected $httpEndpoint;
     protected $httpMethod = "GET";
@@ -440,5 +442,43 @@ class Route
     {
         $this->access = $access;
         return $this;
+    }
+
+    /**
+     * @param bool $safe
+     *
+     * @return Route
+     */
+    public function setSDKModelSafe(bool $safe): Route
+    {
+        $this->SDKModelSafe = $safe;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSDKModelSafe() : bool
+    {
+        return $this->SDKModelSafe;
+    }
+
+    /**
+     * @param bool $hydrate
+     *
+     * @return Route
+     */
+    public function setSDKHydrate(bool $hydrate): Route
+    {
+        $this->SDKHydrate = $hydrate;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSDKHydrate() : bool
+    {
+        return $this->SDKHydrate;
     }
 }
