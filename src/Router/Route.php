@@ -14,6 +14,7 @@ class Route
     protected $SDKFunction;
     protected $SDKTemplate = "callback";
     protected $SDKModelSafe = false;
+    protected $SDKTableName;
     protected $SDKHydrate = false;
     protected $routerPattern;
     protected $httpEndpoint;
@@ -88,6 +89,25 @@ class Route
             ],
             $property
         );
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSDKTableName(): ?string
+    {
+        return $this->SDKTableName;
+    }
+
+    /**
+     * @param string $SDKTableName
+     *
+     * @return Route
+     */
+    public function setSDKTableName(string $SDKTableName): Route
+    {
+        $this->SDKTableName = $SDKTableName;
         return $this;
     }
 
