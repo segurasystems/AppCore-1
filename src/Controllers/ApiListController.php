@@ -35,6 +35,7 @@ class ApiListController extends Controller
                     'modelSafeMethod'    => $route->getSDKModelSafe(),
                     'hydratable'         => $route->getSDKHydrate(),
                     'tableName'          => $route->getSDKTableName(),
+                    'responseKey'        => $route->getSDKResponseKey(),
                 ];
 
                 $json['Routes'][] = array_filter($routeArray);
