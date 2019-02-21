@@ -16,6 +16,7 @@ class Route
     protected $SDKModelSafe = false;
     protected $SDKTableName;
     protected $SDKHydrate = false;
+    protected $SDKResponseKey;
     protected $routerPattern;
     protected $httpEndpoint;
     protected $httpMethod = "GET";
@@ -501,4 +502,25 @@ class Route
     {
         return $this->SDKHydrate;
     }
+
+    /**
+     * @return string
+     */
+    public function getSDKResponseKey(): string
+    {
+        return $this->SDKResponseKey;
+    }
+
+    /**
+     * @param string $SDKResponseKey
+     *
+     * @return Route
+     */
+    public function setSDKResponseKey(string $SDKResponseKey): Route
+    {
+        $this->SDKResponseKey = $SDKResponseKey;
+        return $this;
+    }
+
+
 }
