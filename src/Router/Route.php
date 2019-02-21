@@ -506,7 +506,7 @@ class Route
     /**
      * @return string
      */
-    public function getSDKResponseKey(): string
+    public function getSDKResponseKey(): ?string
     {
         return $this->SDKResponseKey;
     }
