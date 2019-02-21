@@ -34,6 +34,7 @@ class ApiListController extends Controller
                     'callbackProperties' => $route->getCallbackProperties(),
                     'modelSafeMethod'    => $route->getSDKModelSafe(),
                     'hydratable'         => $route->getSDKHydrate(),
+                    'tableName'          => $route->getSDKTableName(),
                 ];
 
                 $json['Routes'][] = array_filter($routeArray);
