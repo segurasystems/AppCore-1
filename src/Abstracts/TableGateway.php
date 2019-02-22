@@ -704,41 +704,42 @@ abstract class TableGateway extends ZendTableGateway
                 $select->where($conditional);
             } else {
                 $spec = function (Where $where) use ($conditional) {
+                    $column = (empty($conditional["table"]) ? '' : "{$conditional["table"]}.") . $conditional["column"];
                     switch ($conditional['condition']) {
                         case FilterCondition::CONDITION_EQUAL:
-                            $where->equalTo($conditional['column'], $conditional['value']);
+                            $where->equalTo($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_NOT_EQUAL:
-                            $where->notEqualTo($conditional['column'], $conditional['value']);
+                            $where->notEqualTo($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_GREATER_THAN:
-                            $where->greaterThan($conditional['column'], $conditional['value']);
+                            $where->greaterThan($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_GREATER_THAN_OR_EQUAL:
-                            $where->greaterThanOrEqualTo($conditional['column'], $conditional['value']);
+                            $where->greaterThanOrEqualTo($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_LESS_THAN:
-                            $where->lessThan($conditional['column'], $conditional['value']);
+                            $where->lessThan($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_LESS_THAN_OR_EQUAL:
-                            $where->lessThanOrEqualTo($conditional['column'], $conditional['value']);
+                            $where->lessThanOrEqualTo($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_LIKE:
-                            $where->like($conditional['column'], $conditional['value']);
+                            $where->like($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_NOT_LIKE:
-                            $where->notLike($conditional['column'], $conditional['value']);
+                            $where->notLike($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_IN:
-                            $where->in($conditional['column'], $conditional['value']);
+                            $where->in($column, $conditional['value']);
                             break;
                         case FilterCondition::CONDITION_NOT_IN:
-                            $where->notIn($conditional['column'], $conditional['value']);
+                            $where->notIn($column, $conditional['value']);
                             break;
 
                         default:
                             // @todo better exception plz.
-                            throw new \Exception("Cannot work out what conditional '{$conditional['condition']}'' is supposed to do in Zend... Probably unimplemented?");
+                            throw new \Exception("Cannot work out what conditional '{$conditional['condition']}' is supposed to do in Zend... Probably unimplemented?");
                     }
                 };
                 $select->where($spec);
@@ -754,7 +755,11 @@ abstract class TableGateway extends ZendTableGateway
     private function addJoinsToSelect(Select $select, array $joins = []): Select
     {
         foreach ($joins as $join) {
-            $select->join($join["table"], $join["on"], $join["columns"], $join["type"]);
+            $select->join(
+                $join["tableFrom"],
+                "{$join["tableFrom"]}.{$join["fieldFrom"]} = {$join["tableTo"]}.{$join["fieldTo"]}",
+                $join["columns"],
+                $join["type"]);
         }
         return $select;
     }
