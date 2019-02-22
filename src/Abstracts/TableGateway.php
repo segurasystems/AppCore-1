@@ -193,10 +193,11 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param Filter $filter
+     * @param bool   $doCount
      *
      * @return array
      */
-    public function fetchAllFilter(Filter $filter)
+    public function fetchAllFilter(Filter $filter,bool $doCount = true)
     {
         return $this->fetchAll(
             $filter->getLimit(),
@@ -204,7 +205,8 @@ abstract class TableGateway extends ZendTableGateway
             $filter->getWheres(),
             $filter->getOrder(),
             $filter->getOrderDirection(),
-            $filter->getJoins()
+            $filter->getJoins(),
+            $doCount
         );
     }
 
@@ -217,6 +219,7 @@ abstract class TableGateway extends ZendTableGateway
      * @param string|Expression|null $order     Column to order on
      * @param string|null            $direction Direction to order on (SELECT::ORDER_ASCENDING|SELECT::ORDER_DESCENDING)
      * @param array                  $joins     Array of join objects for joining tables in query
+     * @param bool                   $doCount   Save some time by not counting if this is false
      *
      * @return array [ResultSet,int] Returns an array of resultSet,total_found_rows
      */
@@ -226,7 +229,8 @@ abstract class TableGateway extends ZendTableGateway
         array $wheres = [],
         $order = null,
         string $direction = Select::ORDER_ASCENDING,
-        array $joins = []
+        array $joins = [],
+        bool $doCount = true
     ) {
         /** @var Select $select */
         $select = $this->getSql()->select();
@@ -251,20 +255,24 @@ abstract class TableGateway extends ZendTableGateway
 
         $resultSet = $this->selectWith($select);
 
-        $quantifierSelect = $select
-            ->reset(Select::LIMIT)
-            ->reset(Select::COLUMNS)
-            ->reset(Select::OFFSET)
-            ->reset(Select::ORDER)
-            ->reset(Select::COMBINE)
-            ->columns(['total' => new Expression('COUNT(*)')]);
+        if($doCount) {
+            $quantifierSelect = $select
+                ->reset(Select::LIMIT)
+                ->reset(Select::COLUMNS)
+                ->reset(Select::OFFSET)
+                ->reset(Select::ORDER)
+                ->reset(Select::COMBINE)
+                ->columns(['total' => new Expression('COUNT(*)')]);
 
-        /* execute the select and extract the total */
-        $row = $this->getSql()
-            ->prepareStatementForSqlObject($quantifierSelect)
-            ->execute()
-            ->current();
-        $total = (int)$row['total'];
+            /* execute the select and extract the total */
+            $row = $this->getSql()
+                ->prepareStatementForSqlObject($quantifierSelect)
+                ->execute()
+                ->current();
+            $total = (int)$row['total'];
+        } else {
+            $total = null;
+        }
 
         return [$resultSet, $total];
     }

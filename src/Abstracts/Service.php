@@ -84,7 +84,8 @@ abstract class Service
         array $wheres = [],
         $order = null,
         string $orderDirection = null,
-        array $joins = []
+        array $joins = [],
+        $doCount = true
     ) {
         /** @var TableGateway $tableGateway */
         $tableGateway              = $this->getNewTableGatewayInstance();
@@ -94,7 +95,8 @@ abstract class Service
             $wheres,
             $order,
             $orderDirection !== null ? $orderDirection : Select::ORDER_ASCENDING,
-            $joins
+            $joins,
+            $doCount
         );
         $return = [];
 
