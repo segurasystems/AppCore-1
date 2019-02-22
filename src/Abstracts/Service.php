@@ -75,6 +75,7 @@ abstract class Service
      * @param array|\Closure[]|null  $wheres
      * @param string|Expression|null $order
      * @param string|null            $orderDirection
+     * @param bool                   $doCount
      *
      * @return Model[]
      */
@@ -85,7 +86,7 @@ abstract class Service
         $order = null,
         string $orderDirection = null,
         array $joins = [],
-        $doCount = true
+        bool $doCount = true
     ) {
         /** @var TableGateway $tableGateway */
         $tableGateway              = $this->getNewTableGatewayInstance();
