@@ -70,12 +70,17 @@ abstract class Controller
         );
     }
 
-    public function jsonFailureResponse(string $message,Request $request ,Response $response){
-        return $this->jsonResponse(
-            [
+    public function jsonFailureResponse($data,Request $request ,Response $response){
+        if(is_array($data)){
+            $data = array_merge(['Status' => 'Fail'],$data);
+        } else {
+            $data = [
                 'Status' => 'Fail',
-                'Reason' => $message,
-            ],
+                'Reason' => $data,
+            ];
+        }
+        return $this->jsonResponse(
+            $data,
             $request,
             $response
         );
