@@ -30,6 +30,7 @@ class Route
     protected $exampleEntityFinderFunction;
     protected $callbackProperties = [];
     protected $access = self::ACCESS_PUBLIC;
+    protected $arguments = [];
 
     public static function Factory() : Route
     {
@@ -109,6 +110,25 @@ class Route
     public function setSDKTableName(string $SDKTableName): Route
     {
         $this->SDKTableName = $SDKTableName;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
+    /**
+     * @param array $arguments
+     *
+     * @return Route
+     */
+    public function setArguments(array $arguments): Route
+    {
+        $this->arguments = $arguments;
         return $this;
     }
 
@@ -405,6 +425,9 @@ class Route
 
         $mapping->setName($this->getName() ? $this->getName() : "Unnamed Route");
         $mapping->setArgument('access', $this->getAccess());
+        foreach ($this->getArguments() as $key => $value){
+            $mapping->setArgument(trim(strtolower($key)),$value);
+        }
         return $app;
     }
 
