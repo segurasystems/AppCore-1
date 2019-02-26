@@ -425,6 +425,9 @@ class Route
 
         $mapping->setName($this->getName() ? $this->getName() : "Unnamed Route");
         $mapping->setArgument('access', $this->getAccess());
+        foreach ($this->getMeta() as $metaKey => $metaValue){
+            $mapping->setArgument(strtolower($metaKey),$metaValue);
+        }
         return $app;
     }
 
