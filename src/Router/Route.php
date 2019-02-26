@@ -30,7 +30,7 @@ class Route
     protected $exampleEntityFinderFunction;
     protected $callbackProperties = [];
     protected $access = self::ACCESS_PUBLIC;
-    protected $meta = [];
+    protected $arguments = [];
 
     public static function Factory() : Route
     {
@@ -116,19 +116,19 @@ class Route
     /**
      * @return array
      */
-    public function getMeta(): array
+    public function getArguments(): array
     {
-        return $this->meta;
+        return $this->arguments;
     }
 
     /**
-     * @param array $meta
+     * @param array $arguments
      *
      * @return Route
      */
-    public function setMeta(array $meta): Route
+    public function setArguments(array $arguments): Route
     {
-        $this->meta = $meta;
+        $this->arguments = $arguments;
         return $this;
     }
 
@@ -425,8 +425,8 @@ class Route
 
         $mapping->setName($this->getName() ? $this->getName() : "Unnamed Route");
         $mapping->setArgument('access', $this->getAccess());
-        foreach ($this->getMeta() as $metaKey => $metaValue){
-            $mapping->setArgument(strtolower($metaKey),$metaValue);
+        foreach ($this->getArguments() as $key => $value){
+            $mapping->setArgument(trim(strtolower($key)),$value);
         }
         return $app;
     }
