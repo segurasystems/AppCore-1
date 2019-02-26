@@ -30,6 +30,7 @@ class Route
     protected $exampleEntityFinderFunction;
     protected $callbackProperties = [];
     protected $access = self::ACCESS_PUBLIC;
+    protected $meta = [];
 
     public static function Factory() : Route
     {
@@ -109,6 +110,25 @@ class Route
     public function setSDKTableName(string $SDKTableName): Route
     {
         $this->SDKTableName = $SDKTableName;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMeta(): array
+    {
+        return $this->meta;
+    }
+
+    /**
+     * @param array $meta
+     *
+     * @return Route
+     */
+    public function setMeta(array $meta): Route
+    {
+        $this->meta = $meta;
         return $this;
     }
 
