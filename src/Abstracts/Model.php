@@ -27,12 +27,13 @@ abstract class Model implements ModelInterface
     {
         $array = [];
 
-        $transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
+        //$transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
 
         foreach ($this->getListOfProperties() as $property) {
             $getFunction                               = "get{$property}";
             $currentValue                              = $this->$getFunction();
-            $array[$transformer->transform($property)] = $currentValue;
+//            $array[$transformer->transform($property)] = $currentValue;
+            $array[$property] = $currentValue;
         }
 
         return array_merge($array);
