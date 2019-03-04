@@ -399,7 +399,7 @@ abstract class TableGateway extends ZendTableGateway
             ->execute()
             ->current();
 
-        return !is_null($row) ? $row['total'] : 0;
+        return !is_null($row) ? intval($row['total']) : 0;
     }
 
     /**
