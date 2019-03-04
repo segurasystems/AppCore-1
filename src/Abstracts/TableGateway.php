@@ -372,6 +372,13 @@ abstract class TableGateway extends ZendTableGateway
         return (count($resultSet) > 0) ? $resultSet->current() : null;
     }
 
+    public function getCountFilter(Filter $filter){
+        return $this->getCount(
+            $filter->getWheres(),
+            $filter->getJoins()
+        );
+    }
+
     /**
      * @param Where[]|PredicateInterface[] $wheres
      *
