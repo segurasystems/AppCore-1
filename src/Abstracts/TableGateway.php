@@ -31,6 +31,32 @@ abstract class TableGateway extends ZendTableGateway
         parent::__construct($table, $adapter, $features, $resultSetPrototype, $sql);
     }
 
+    public function updatePK(Model $model,$newPK){
+        $pk = $model->getPrimaryKeys();
+        $new = $pk;
+        if(is_array($newPK)){
+            foreach ($newPK  as $field => $value){
+                if(!empty($new[$field])){
+                    $new[$field] = $value;
+                }
+            }
+        } else if(count($new) === 1){
+            $new[array_keys($new)[0]] = $newPK;
+        } else {
+            throw new InvalidQueryException(
+                "PK Missmatch " . get_class() . "->updatePK(): ... " .
+                substr(var_export($model, true), 0, 1024) . "\n\n"
+            );
+        }
+        $this->update(
+            $new,
+            $pk,
+            $model->__toRawArray()
+        );
+
+        return $this->getByPrimaryKey($new);
+    }
+
     /**
      * @param Model $model
      *

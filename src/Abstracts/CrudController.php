@@ -102,4 +102,29 @@ abstract class CrudController extends Controller
             $response
         );
     }
+
+    public function updateIDRequest(Request $request, Response $response, $args) : Response
+    {
+        /** @var ModelInterface $object */
+        $object = $this->getService()->updatePK($args['oldID'],$args['newID']);
+        if ($object) {
+            return $this->jsonSuccessResponse(
+                [
+                    'Action'                          => 'UPDATE_PK',
+                    $this->service->getTermSingular() => $object->__toArray(),
+                ],
+                $request,
+                $response
+            );
+        }
+        return $this->jsonFailureResponse(
+            sprintf(
+                "No such %s found with id %s",
+                strtolower($this->service->getTermSingular()),
+                $args['oldID']
+            ),
+            $request,
+            $response
+        );
+    }
 }
