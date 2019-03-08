@@ -2,6 +2,7 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\AppCore\Interfaces\ModelInterface;
+use Gone\SDK\Common\Filters\Filter;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
@@ -16,7 +17,7 @@ abstract class CrudController extends Controller
             $filterBehaviours = $this->parseFilters($request, $response);
             $foundObjects     = $service->getAllFilter($filterBehaviours);
         } else {
-            $foundObjects = $service->getAll();
+            $foundObjects = $service->getAllFilter(Filter::Factory());
         }
 
         foreach ($foundObjects as $object) {
