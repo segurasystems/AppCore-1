@@ -32,7 +32,6 @@ abstract class Model implements ModelInterface
         foreach ($this->getListOfProperties() as $property) {
             $getFunction                               = "get{$property}";
             $currentValue                              = $this->$getFunction();
-//            $array[$transformer->transform($property)] = $currentValue;
             $array[$property] = $currentValue;
         }
 
@@ -44,14 +43,7 @@ abstract class Model implements ModelInterface
      */
     public function __toRawArray()
     {
-        $array = [];
-
-        $transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-
-        foreach ($this->getListOfProperties() as $property) {
-            $currentValue                              = $this->$property;
-            $array[$transformer->transform($property)] = $currentValue;
-        }
+        $array = $this->__toPublicArray();
 
         return array_merge($array);
     }
@@ -63,7 +55,7 @@ abstract class Model implements ModelInterface
     {
         $publicArray = [];
         foreach ($this->getListOfProperties() as $property) {
-            $publicArray[ucfirst($property)] = $this->$property;
+            $publicArray[$property] = $this->$property;
         }
         return $publicArray;
     }

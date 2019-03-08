@@ -75,6 +75,27 @@ abstract class CrudController extends Controller
         }
     }
 
+    public function createBulkRequest(Request $request, Response $response, $args) : Response
+    {
+        $newObjectArray = $request->getParsedBody();
+        try {
+            $objects = [];
+            foreach ($newObjectArray as $newObjectArrayItem){
+                $objects[] = $this->getService()->createFromArray($newObjectArrayItem)->__toArray();
+            }
+            return $this->jsonSuccessResponse(
+                [
+                    'Action'                          => 'CREATE',
+                    $this->service->getTermPlural() => $objects,
+                ],
+                $request,
+                $response
+            );
+        } catch (InvalidQueryException $iqe) {
+            return $this->jsonResponseException($iqe, $request, $response);
+        }
+    }
+
     public function deleteRequest(Request $request, Response $response, $args) : Response
     {
         /** @var ModelInterface $object */
