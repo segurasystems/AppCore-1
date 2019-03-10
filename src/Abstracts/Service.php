@@ -12,9 +12,9 @@ abstract class Service
     /** @var TableAccessLayer */
     private $tableAccessLayer;
 
-    public function __construct(TableAccessLayer $tableGateway)
+    public function __construct(TableAccessLayer $tableAccessLayer)
     {
-        $this->tableAccessLayer = $tableGateway;
+        $this->tableAccessLayer = $tableAccessLayer;
     }
 
     protected function getTableAccessLayer()
