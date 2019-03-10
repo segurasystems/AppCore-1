@@ -18,6 +18,7 @@ use Zend\Db\TableGateway\TableGateway as ZendTableGateway;
 
 abstract class TableGateway extends ZendTableGateway
 {
+    protected $isView = false;
     protected $model;
 
     public function __construct($table, AdapterInterface $adapter, $features = null, $resultSetPrototype = null, $sql = null)
@@ -118,12 +119,30 @@ abstract class TableGateway extends ZendTableGateway
     public function saveInsert(Model $model)
     {
         $data = $model->__toRawArray();
-        $this->insert($data);
+
+        if($this->isView){
+            $breakDown = $this->getViewModelBreakdown();
+            $inserts = [];
+            foreach ($breakDown as $baseTable => $structure){
+                $columns = $structure["columns"];
+                $_data = array_filter($data,function($key)use($columns){return in_array($key,$columns);});
+                if(!empty($structure["dependent"])){
+                    foreach ($structure["dependent"] as $dependant => $source){
+                        $_data[$dependant] = $inserts[$source];
+                    }
+                }
+                $this->insert($_data);
+                $inserts[$baseTable] = $this->getLastInsertValue();
+            }
+        } else {
+            $this->insert($data);
+            $inserted = $this->getLastInsertValue();
+        }
 
         if ($model->hasPrimaryKey()) {
             return $model->getPrimaryKeys();
         }
-        return $this->getLastInsertValue();
+        return $inserted;
     }
 
 
@@ -135,11 +154,29 @@ abstract class TableGateway extends ZendTableGateway
      */
     public function saveUpdate(Model $model, Model $oldModel)
     {
-        return $this->update(
-            $model->__toRawArray(),
-            $model->getPrimaryKeys(),
-            $oldModel->__toRawArray()
-        );
+        if($this->isView){
+            $breakDown = $this->getViewModelBreakdown();
+            $rows = 0;
+            $data = $model->__toRawArray();
+            foreach ($breakDown as $baseTable => $structure) {
+                $columns = $structure["columns"];
+                $_data = array_filter($data, function ($key) use ($columns) {
+                    return in_array($key, $columns);
+                });
+                $rows += $this->update(
+                    $_data,
+                    $model->getPrimaryKeys(),
+                    $oldModel->__toRawArray()
+                );
+            }
+            return $rows;
+        } else {
+            return $this->update(
+                $model->__toRawArray(),
+                $model->getPrimaryKeys(),
+                $oldModel->__toRawArray()
+            );
+        }
     }
 
     /**
@@ -162,9 +199,11 @@ abstract class TableGateway extends ZendTableGateway
      */
     public function update($data, $where = null, $oldData = [])
     {
-        $data = array_filter($data);
-        #!\Kint::dump($data, $oldData, $where);exit;
         return parent::update($data, $where);
+    }
+
+    public function getViewModelBreakdown(){
+        return [];
     }
 
     /**
