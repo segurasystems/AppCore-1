@@ -30,7 +30,7 @@
         "gone.io/uuid": "^2.2",
         "twig/extensions": "^1.3",
         "gone.io/sessions": "^1.0",
-        "gone.io/libcommon": "dev-segura",
+        "gone.io/libcommon": "dev-master",
         "monolog/monolog": "^1.19.0",
         "predis/predis": "^1.0",
         "jimmiw/php-time-ago": "^0.4.11",
