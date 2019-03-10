@@ -51,14 +51,15 @@ abstract class TableAccessLayer
     public function update(Model $model)
     {
         if($this->isView){
-            return $this->updateThroughView($model);
+            $this->updateThroughView($model);
         } else {
-            return $this->getTableGateway()
+            $this->getTableGateway()
                 ->update(
                     $model->__toUpsertArray(),
                     $model->getPrimaryKeys()
                 );
         }
+        return $this->getMatching($model->getPrimaryKeys());
     }
 
     private function updateThroughView(Model $model){
@@ -82,11 +83,15 @@ abstract class TableAccessLayer
     public function create(Model $model)
     {
         if($this->isView){
-            return $this->createThroughView($model);
+            $pk = $this->createThroughView($model);
         } else {
             $this->getTableGateway()->insert($model->__toArray());
-            return $this->getTableGateway()->getLastInsertValue();
+            $pk = $this->getTableGateway()->getLastInsertValue();
         }
+        if(!is_array($pk)){
+            $pk = ["id" => $pk];
+        }
+        return $this->getMatching($pk);
     }
 
     private function createThroughView(Model $model){
