@@ -2,6 +2,7 @@
 
 namespace Gone\AppCore\Abstracts;
 
+use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Filters\Filter;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
@@ -22,16 +23,16 @@ abstract class Service
         return $this->tableAccessLayer;
     }
 
-    abstract public function update($pk, $dataArray): ?Model;
+    abstract public function update($pk, $dataArray): ?AbstractModel;
 
-    abstract public function create($dataArray): ?Model;
+    abstract public function create($dataArray): ?AbstractModel;
 
     /**
      * @param Filter $filter
      *
-     * @return Model|null
+     * @return AbstractModel|null
      */
-    public function get(Filter $filter): ?Model
+    public function get(Filter $filter): ?AbstractModel
     {
         return $this->getTableAccessLayer()
             ->get($filter);
@@ -40,7 +41,7 @@ abstract class Service
     /**
      * @param Filter $filter
      *
-     * @return Model[]
+     * @return AbstractModel[]
      */
     public function getAll(Filter $filter): array
     {
