@@ -26,8 +26,6 @@ abstract class Service
 
     abstract public function create($dataArray): ?Model;
 
-    abstract public function getByPK($pk): ?Model;
-
     /**
      * @param Filter $filter
      *
