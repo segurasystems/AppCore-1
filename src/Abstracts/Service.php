@@ -23,16 +23,25 @@ abstract class Service
         return $this->tableAccessLayer;
     }
 
-    abstract public function update($pk, $dataArray): ?AbstractModel;
+    /**
+     * @param $pk
+     * @param $dataArray
+     * @return AbstractModel|null
+     */
+    abstract public function update($pk, $dataArray);
 
-    abstract public function create($dataArray): ?AbstractModel;
+    /**
+     * @param $dataArray
+     * @return AbstractModel|null
+     */
+    abstract public function create($dataArray);
 
     /**
      * @param Filter $filter
      *
      * @return AbstractModel|null
      */
-    public function get(Filter $filter): ?AbstractModel
+    public function get(Filter $filter)
     {
         return $this->getTableAccessLayer()
             ->get($filter);
