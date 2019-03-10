@@ -18,24 +18,25 @@ class ApiListController extends Controller
             foreach (Router::Instance()->getRoutes() as $route) {
                 $routeArray = [
                     'name'               => $route->getName(),
-                    'class'              => $route->getSDKClass(),
-                    'function'           => $route->getSDKFunction(),
-                    'template'           => $route->getSDKTemplate(),
+//                    'class'              => $route->getSDKClass(),
+//                    'function'           => $route->getSDKFunction(),
+//                    'template'           => $route->getSDKTemplate(),
                     'endpoint'           => $route->getHttpEndpoint(),
                     'pattern'            => $route->getRouterPattern(),
                     'method'             => $route->getHttpMethod(),
-                    'singular'           => $route->getSingular(),
-                    'plural'             => $route->getPlural(),
-                    'properties'         => $route->getProperties(),
-                    'propertiesOptions'  => $route->getPropertyOptions(),
-                    'propertyData'       => $route->getPropertyData(),
+//                    'singular'           => $route->getSingular(),
+//                    'plural'             => $route->getPlural(),
+//                    'properties'         => $route->getProperties(),
+//                    'propertiesOptions'  => $route->getPropertyOptions(),
+//                    'propertyData'       => $route->getPropertyData(),
                     'access'             => $route->getAccess(),
                     'example'            => $route->getExampleEntity() ? $route->getExampleEntity()->__toArray() : null,
-                    'callbackProperties' => $route->getCallbackProperties(),
-                    'modelSafeMethod'    => $route->getSDKModelSafe(),
-                    'hydratable'         => $route->getSDKHydrate(),
-                    'tableName'          => $route->getSDKTableName(),
-                    'responseKey'        => $route->getSDKResponseKey(),
+//                    'callbackProperties' => $route->getCallbackProperties(),
+//                    'modelSafeMethod'    => $route->getSDKModelSafe(),
+//                    'hydratable'         => $route->getSDKHydrate(),
+//                    'tableName'          => $route->getSDKTableName(),
+//                    'responseKey'        => $route->getSDKResponseKey(),
+                    'SDKProperties'     => $route->getSdkProperties(),
                 ];
 
                 $json['Routes'][] = array_filter($routeArray);
@@ -74,7 +75,7 @@ class ApiListController extends Controller
                     'methods'  => $route->getHttpMethod(),
                     'callable' => $callable,
                     'access'   => $route->getAccess(),
-                    'properties'=> $route->getCallbackProperties(),
+                    'properties'=> $route->getSdkProperties(),
                 ];
             }
         }

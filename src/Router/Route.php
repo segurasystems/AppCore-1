@@ -1,4 +1,5 @@
 <?php
+
 namespace Gone\AppCore\Router;
 
 use Slim\App;
@@ -10,107 +11,33 @@ class Route
 
     protected $name;
     protected $callback;
-    protected $SDKClass;
-    protected $SDKFunction;
-    protected $SDKTemplate = "callback";
-    protected $SDKModelSafe = false;
-    protected $SDKTableName;
-    protected $SDKHydrate = false;
-    protected $SDKResponseKey;
+//    protected $SDKClass;
+//    protected $SDKFunction;
+//    protected $SDKTemplate = "callback";
+//    protected $SDKModelSafe = false;
+//    protected $SDKTableName;
+//    protected $SDKHydrate = false;
+//    protected $SDKResponseKey;
     protected $routerPattern;
     protected $httpEndpoint;
     protected $httpMethod = "GET";
-    protected $weight     = 0;
-    protected $singular;
-    protected $plural;
-    protected $properties;
-    protected $propertyData = [];
-    protected $propertyOptions;
+    protected $weight = 0;
+//    protected $singular;
+//    protected $plural;
+//    protected $properties;
+//    protected $propertyData = [];
+//    protected $propertyOptions;
     protected $exampleEntity;
     protected $exampleEntityFinderFunction;
-    protected $callbackProperties = [];
+//    protected $callbackProperties = [];
     protected $access = self::ACCESS_PUBLIC;
     protected $arguments = [];
 
-    public static function Factory() : Route
+    protected $sdkProperties;
+
+    public static function Factory(): Route
     {
         return new Route();
-    }
-
-    /**
-     * @return array
-     */
-    public function getCallbackProperties(): array
-    {
-        return $this->callbackProperties;
-    }
-
-    /**
-     * @param array $callbackProperties
-     *
-     * @return Route
-     */
-    public function setCallbackProperties(array $callbackProperties): Route
-    {
-        $this->callbackProperties = [];
-        foreach ($callbackProperties as $name => $property){
-            $this->populateCallbackProperty($name,$property);
-        }
-        return $this;
-    }
-
-    /**
-     * @param $name
-     * @param bool $mandatory
-     * @param null $default
-     *
-     * @return $this
-     */
-    public function addCallbackProperty(string $name, bool $mandatory = false, $default = null)
-    {
-        return $this->populateCallbackProperty($name,[
-            'isMandatory' => $mandatory,
-            'default'     => $default,
-        ]);
-    }
-
-    /**
-     * @param string $name
-     * @param array  $property
-     */
-    public function populateCallbackProperty(string $name,array $property){
-        $property["name"] = $name;
-        $this->callbackProperties[$name] = array_merge(
-            [
-                "in" => null,
-                "description" => null,
-                "isMandatory" => null,
-                "default" => null,
-                "type" => null,
-                "examples" => [],
-            ],
-            $property
-        );
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSDKTableName(): ?string
-    {
-        return $this->SDKTableName;
-    }
-
-    /**
-     * @param string $SDKTableName
-     *
-     * @return Route
-     */
-    public function setSDKTableName(string $SDKTableName): Route
-    {
-        $this->SDKTableName = $SDKTableName;
-        return $this;
     }
 
     /**
@@ -129,25 +56,6 @@ class Route
     public function setArguments(array $arguments): Route
     {
         $this->arguments = $arguments;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSDKTemplate(): string
-    {
-        return $this->SDKTemplate;
-    }
-
-    /**
-     * @param string $SDKTemplate
-     *
-     * @return Route
-     */
-    public function setSDKTemplate(string $SDKTemplate): Route
-    {
-        $this->SDKTemplate = $SDKTemplate;
         return $this;
     }
 
@@ -176,18 +84,18 @@ class Route
      *
      * @return Route
      */
-    public function setHttpMethod($httpMethod) : Route
+    public function setHttpMethod($httpMethod): Route
     {
         $this->httpMethod = $httpMethod;
         return $this;
     }
 
-    public function getWeight() : int
+    public function getWeight(): int
     {
         return $this->weight;
     }
 
-    public function setWeight(int $weight) : Route
+    public function setWeight(int $weight): Route
     {
         $this->weight = $weight;
         return $this;
@@ -206,7 +114,7 @@ class Route
      *
      * @return Route
      */
-    public function setRouterPattern($routerPattern) : Route
+    public function setRouterPattern($routerPattern): Route
     {
         $this->routerPattern = $routerPattern;
         return $this;
@@ -217,7 +125,7 @@ class Route
      *
      * @return Route
      */
-    public function setExampleEntityFindFunction(callable $finderFunction) : Route
+    public function setExampleEntityFindFunction(callable $finderFunction): Route
     {
         $this->exampleEntityFinderFunction = $finderFunction;
         return $this;
@@ -240,7 +148,7 @@ class Route
      *
      * @return Route
      */
-    public function setExampleEntity($exampleEntity) : Route
+    public function setExampleEntity($exampleEntity): Route
     {
         $this->exampleEntity = $exampleEntity;
         return $this;
@@ -259,153 +167,9 @@ class Route
      *
      * @return Route
      */
-    public function setName($name) : Route
+    public function setName($name): Route
     {
         $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSDKClass()
-    {
-        return $this->SDKClass;
-    }
-
-    /**
-     * @param mixed $SDKClass
-     *
-     * @return Route
-     */
-    public function setSDKClass($SDKClass) : Route
-    {
-        $this->SDKClass = $SDKClass;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSDKFunction()
-    {
-        return $this->SDKFunction;
-    }
-
-    /**
-     * @param mixed $function
-     *
-     * @return Route
-     */
-    public function setSDKFunction($function) : Route
-    {
-        $this->SDKFunction = $function;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSingular()
-    {
-        return $this->singular;
-    }
-
-    /**
-     * @param mixed $singular
-     *
-     * @return Route
-     */
-    public function setSingular($singular) : Route
-    {
-        $this->singular = $singular;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPlural()
-    {
-        return $this->plural;
-    }
-
-    /**
-     * @param mixed $plural
-     *
-     * @return Route
-     */
-    public function setPlural($plural) : Route
-    {
-        $this->plural = $plural;
-        return $this;
-    }
-
-    public function getPropertyData(){
-        return $this->propertyData;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getProperties()
-    {
-        return $this->properties;
-    }
-
-    /**
-     * @param mixed $properties
-     *
-     * @return Route
-     */
-    public function setProperties($properties) : Route
-    {
-        $this->properties = [];
-        foreach ($properties as $name => $type) {
-            if(is_numeric($name)){
-                $this->properties[] = $type;
-            } else {
-                $this->properties[] = $name;
-                $this->propertyData[$name]["type"] = $type;
-            }
-        }
-        return $this;
-    }
-
-    public function setPropertyData(array $propertyData){
-        $this->propertyData = [];
-        $this->properties = [];
-        $this->propertyOptions = [];
-        foreach ($propertyData as $name => $data) {
-            $this->properties[] = $name;
-            if(!empty($data["options"])){
-                $this->propertyOptions[$name] = $data["options"];
-            }
-            $this->propertyData[$name] = $data;
-        }
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPropertyOptions()
-    {
-        return $this->propertyOptions;
-    }
-
-    /**
-     * @param mixed $propertyOptions
-     *
-     * @return Route
-     */
-    public function setPropertyOptions($propertyOptions)
-    {
-        $this->propertyOptions = [];
-        foreach ($propertyOptions as $name => $options) {
-            $this->propertyOptions[$name] = $options;
-            $this->propertyData[$name]["options"] = $options;
-        }
         return $this;
     }
 
@@ -414,7 +178,7 @@ class Route
      *
      * @return \Slim\App
      */
-    public function populateRoute(App $app) : App
+    public function populateRoute(App $app): App
     {
         #echo "Populating: {$this->getHttpMethod()} {$this->getRouterPattern()}\n";
         $mapping = $app->map(
@@ -425,8 +189,8 @@ class Route
 
         $mapping->setName($this->getName() ? $this->getName() : "Unnamed Route");
         $mapping->setArgument('access', $this->getAccess());
-        foreach ($this->getArguments() as $key => $value){
-            $mapping->setArgument(trim(strtolower($key)),$value);
+        foreach ($this->getArguments() as $key => $value) {
+            $mapping->setArgument(trim(strtolower($key)), $value);
         }
         return $app;
     }
@@ -444,7 +208,7 @@ class Route
      *
      * @return Route
      */
-    public function setCallback($callback) : Route
+    public function setCallback($callback): Route
     {
         $this->callback = $callback;
         return $this;
@@ -463,7 +227,7 @@ class Route
      *
      * @return Route
      */
-    public function setHttpEndpoint($httpEndpoint) : Route
+    public function setHttpEndpoint($httpEndpoint): Route
     {
         $this->httpEndpoint = $httpEndpoint;
         return $this;
@@ -482,66 +246,27 @@ class Route
      *
      * @return Route
      */
-    public function setAccess($access = self::ACCESS_PUBLIC) : Route
+    public function setAccess($access = self::ACCESS_PUBLIC): Route
     {
         $this->access = $access;
         return $this;
     }
 
     /**
-     * @param bool $safe
-     *
+     * @return mixed
+     */
+    public function getSdkProperties(): ?RouteSDKProperties
+    {
+        return $this->sdkProperties;
+    }
+
+    /**
+     * @param mixed $sdkProperties
      * @return Route
      */
-    public function setSDKModelSafe(bool $safe): Route
+    public function setSdkProperties(RouteSDKProperties $sdkProperties)
     {
-        $this->SDKModelSafe = $safe;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getSDKModelSafe() : bool
-    {
-        return $this->SDKModelSafe;
-    }
-
-    /**
-     * @param bool $hydrate
-     *
-     * @return Route
-     */
-    public function setSDKHydrate(bool $hydrate): Route
-    {
-        $this->SDKHydrate = $hydrate;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getSDKHydrate() : bool
-    {
-        return $this->SDKHydrate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSDKResponseKey(): ?string
-    {
-        return $this->SDKResponseKey;
-    }
-
-    /**
-     * @param string $SDKResponseKey
-     *
-     * @return Route
-     */
-    public function setSDKResponseKey(string $SDKResponseKey): Route
-    {
-        $this->SDKResponseKey = $SDKResponseKey;
+        $this->sdkProperties = $sdkProperties;
         return $this;
     }
 
