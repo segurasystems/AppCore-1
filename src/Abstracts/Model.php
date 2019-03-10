@@ -5,7 +5,7 @@ use Camel\CaseTransformer;
 use Camel\Format;
 use Gone\AppCore\Interfaces\ModelInterface;
 
-abstract class Model implements ModelInterface
+abstract class Model implements ModelInterface, \JsonSerializable
 {
     protected $_primary_keys       = [];
     protected $_autoincrement_keys = [];
@@ -18,6 +18,11 @@ abstract class Model implements ModelInterface
         if ($data) {
             $this->exchangeArray($data);
         }
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->__toArray();
     }
 
     /**
@@ -126,11 +131,15 @@ abstract class Model implements ModelInterface
     public function getPrimaryKeys()
     {
         $primaryKeyValues = [];
-        foreach ($this->_primary_keys as $primary_key) {
+        foreach ($this->getPrimaryKeyFields() as $primary_key) {
             $getFunction                    = "get{$primary_key}";
             $primaryKeyValues[$primary_key] = $this->$getFunction();
         }
         return $primaryKeyValues;
+    }
+
+    public function getPrimaryKeyFields(){
+        return $this->_primary_keys;
     }
 
     /**
