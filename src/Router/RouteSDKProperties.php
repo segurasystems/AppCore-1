@@ -18,8 +18,8 @@ class RouteSDKProperties implements \JsonSerializable
     protected $responseKey;
     protected $singular;
     protected $plural;
-    protected $modelData;
-    protected $properties;
+    protected $propertyData;
+    protected $arguments;
 
     public static function Factory()
     {
@@ -41,8 +41,8 @@ class RouteSDKProperties implements \JsonSerializable
             "responseKey" => $this->getResponseKey(),
             "singular" => $this->getSingular(),
             "plural" => $this->getPlural(),
-            "modelData" => $this->getModelData(),
-            "properties" => $this->getProperties(),
+            "arguments" => $this->getArguments(),
+            "propertyData" => $this->getPropertyData(),
         ];
     }
 
@@ -175,58 +175,40 @@ class RouteSDKProperties implements \JsonSerializable
     /**
      * @return mixed
      */
-    public function getModelData()
+    public function getPropertyData()
     {
-        return $this->modelData;
+        return $this->propertyData;
     }
 
     /**
-     * @param mixed $modelData
-     * @return RouteSdkProperties
+     * @param mixed $propertyData
+     *
+     * @return RouteSDKProperties
      */
-    public function setModelData($modelData)
+    public function setPropertyData($propertyData)
     {
-        $this->modelData = $modelData;
+        $this->propertyData = $propertyData;
         return $this;
     }
 
     /**
      * @return mixed
      */
-    public function getProperties()
+    public function getArguments()
     {
-        return $this->properties;
+        return $this->arguments;
     }
 
     /**
-     * @param mixed $properties
-     * @return RouteSdkProperties
+     * @param mixed $arguments
+     *
+     * @return RouteSDKProperties
      */
-    public function setProperties($properties)
+    public function setArguments($arguments)
     {
-        $this->properties = $properties;
+        $this->arguments = $arguments;
         return $this;
     }
 
-    public function addCallbackProperty(string $name, array $property)
-    {
-        $property["name"] = $name;
-        $this->properties[$name] = [
-            "in" => $property["in"] ?? "path",
-            "description" => $property["description"] ?? null,
-            "required" => $property["required"] ?? false,
-            "default" => $property["default"] ?? null,
-            "type" => $property["default"] ?? null,
-            "examples" => [],
-        ];
-        return $this;
-    }
 
-    public function addCallbackProperties($properties)
-    {
-        foreach ($properties as $name => $property) {
-            $this->addCallbackProperty($name, $property);
-        }
-        return $this;
-    }
 }
