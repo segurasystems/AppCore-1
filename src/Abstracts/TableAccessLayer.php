@@ -8,6 +8,7 @@
 
 namespace Gone\AppCore\Abstracts;
 
+use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\Filters\FilterCondition;
 use Zend\Db\Adapter\AdapterInterface;
@@ -34,7 +35,8 @@ abstract class TableAccessLayer
         $this->tableGateway = new TableGateway($this->getTable(), $adapter, $features, $resultSetPrototype, $sql);
     }
 
-    public function getTable(){
+    public function getTable()
+    {
         return $this->table;
     }
 
@@ -50,7 +52,7 @@ abstract class TableAccessLayer
 
     public function update(Model $model)
     {
-        if($this->isView){
+        if ($this->isView) {
             $this->updateThroughView($model);
         } else {
             $this->getTableGateway()
@@ -62,7 +64,8 @@ abstract class TableAccessLayer
         return $this->getMatching($model->getPrimaryKeys());
     }
 
-    private function updateThroughView(Model $model){
+    private function updateThroughView(Model $model)
+    {
         $data = $model->__toUpsertArray();
         $pks = $model->getPrimaryKeys();
         $breakdown = $this->getViewBreakdown();
@@ -82,28 +85,31 @@ abstract class TableAccessLayer
 
     public function create(Model $model)
     {
-        if($this->isView){
+        if ($this->isView) {
             $pk = $this->createThroughView($model);
         } else {
             $this->getTableGateway()->insert($model->__toArray());
             $pk = $this->getTableGateway()->getLastInsertValue();
         }
-        if(!is_array($pk)){
+        if (!is_array($pk)) {
             $pk = ["id" => $pk];
         }
         return $this->getMatching($pk);
     }
 
-    private function createThroughView(Model $model){
+    private function createThroughView(Model $model)
+    {
         $data = $model->__toArray();
         $breakdown = $this->getViewBreakdown();
         $inserts = [];
         unset($data["id"]);
-        foreach ($breakdown as $baseTable => $structure){
+        foreach ($breakdown as $baseTable => $structure) {
             $columns = $structure["columns"];
-            $_data = array_filter($data,function($key)use($columns){return in_array($key,$columns);},ARRAY_FILTER_USE_KEY);
-            if(!empty($structure["dependent"])){
-                foreach ($structure["dependent"] as $dependant => $source){
+            $_data = array_filter($data, function ($key) use ($columns) {
+                return in_array($key, $columns);
+            }, ARRAY_FILTER_USE_KEY);
+            if (!empty($structure["dependent"])) {
+                foreach ($structure["dependent"] as $dependant => $source) {
                     $_data[$dependant] = $inserts[$source];
                 }
             }
@@ -111,21 +117,42 @@ abstract class TableAccessLayer
             $inserts[$baseTable] = $this->getTableGateway()->getLastInsertValue();
         }
         foreach ($breakdown as $baseTable => $structure) {
-            if($structure["pk"] == "id"){
+            if ($structure["pk"] == "id") {
                 $data["id"] = $inserts[$baseTable];
             }
         }
         $inserted = [];
-        foreach($model->getPrimaryKeyFields() as $key){
+        foreach ($model->getPrimaryKeyFields() as $key) {
             $inserted[$key] = $data[$key] ?? null;
         }
         return $inserted;
     }
 
-    protected function getViewBreakdown(){
+    protected function getViewBreakdown()
+    {
         return [];
     }
 
+    /**
+     * @param $_pk
+     * @return AbstractModel|null
+     */
+    public function getByPK($_pk)
+    {
+        if (!is_array($_pk)) {
+            $pk = ["id" => $_pk];
+        } else {
+            $pk = $_pk;
+        }
+        return $this->getMatching($pk);
+    }
+
+    /**
+     * @param array $keyValue
+     * @param null $orderBy
+     * @param string $orderDirection
+     * @return AbstractModel|null
+     */
     public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_DESCENDING)
     {
         $matching = $this->getAllMatching($keyValue, $orderBy, $orderDirection, 1);
@@ -135,6 +162,13 @@ abstract class TableAccessLayer
         return null;
     }
 
+    /**
+     * @param array $keyValue
+     * @param null $orderBy
+     * @param string $orderDirection
+     * @param int|null $limit
+     * @return AbstractModel[]
+     */
     public function getAllMatching(
         $keyValue = [],
         $orderBy = null,
@@ -152,6 +186,10 @@ abstract class TableAccessLayer
         return $this->getWithSelect($select);
     }
 
+    /**
+     * @param Filter $filter
+     * @return AbstractModel|null
+     */
     public function get(Filter $filter)
     {
         $filter->setLimit(1);
@@ -162,6 +200,10 @@ abstract class TableAccessLayer
         return null;
     }
 
+    /**
+     * @param Filter|null $filter
+     * @return AbstractModel[]
+     */
     public function getAll(Filter $filter = null)
     {
         $select = $this->getSql()->select();
@@ -169,10 +211,14 @@ abstract class TableAccessLayer
         return $this->getWithSelect($select);
     }
 
+    /**
+     * @param Filter|null $filter
+     * @return int
+     */
     public function count(Filter $filter = null)
     {
         $select = $this->getSQL()->select();
-        $select->columns(['count'=> new Expression('IFNULL(COUNT(*),0)')]);
+        $select->columns(['count' => new Expression('IFNULL(COUNT(*),0)')]);
         $this->applyFilterToSelect($select);
         $row = $this->getSQL()
             ->prepareStatementForSqlObject($select)
@@ -181,6 +227,10 @@ abstract class TableAccessLayer
         return $row["count"] ?? 0;
     }
 
+    /**
+     * @param Select $select
+     * @return array
+     */
     private function getWithSelect(Select $select)
     {
         $resultSet = $this->getTableGateway()->selectWith($select);
@@ -199,7 +249,7 @@ abstract class TableAccessLayer
             $this->applyFilterOrderToSelect($select, $filter);
             $this->applyFilterWhereToSelect($select, $filter);
             $this->applyFilterJoinsToSelect($select, $filter);
-            $this->applyFilterDistinctToSelect($select,$filter);
+            $this->applyFilterDistinctToSelect($select, $filter);
         }
     }
 
@@ -243,7 +293,8 @@ abstract class TableAccessLayer
 //        }
     }
 
-    private function applyJoinToSelect(Select $select, $join){
+    private function applyJoinToSelect(Select $select, $join)
+    {
         $select->join(
             $join["tableFrom"],
             "{$join["tableFrom"]}.{$join["fieldFrom"]} = {$join["tableTo"]}.{$join["fieldTo"]}",
