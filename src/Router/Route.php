@@ -266,7 +266,7 @@ class Route
      */
     public function setSdkProperties(RouteSDKProperties $sdkProperties)
     {
-        $this->sdkProperties = $sdkProperties;
+        $this->sdkProperties = $sdkProperties->__toArray();
         return $this;
     }
 
