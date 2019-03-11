@@ -18,7 +18,7 @@ class RouteSDKProperties implements \JsonSerializable
     protected $responseKey;
     protected $singular;
     protected $plural;
-    protected $propertyData;
+    protected $classSource;
     protected $arguments;
 
     public static function Factory()
@@ -42,7 +42,7 @@ class RouteSDKProperties implements \JsonSerializable
             "singular" => $this->getSingular(),
             "plural" => $this->getPlural(),
             "arguments" => $this->getArguments(),
-            "propertyData" => $this->getPropertyData(),
+            "classSource" => $this->getClassSource(),
         ];
     }
 
@@ -175,25 +175,6 @@ class RouteSDKProperties implements \JsonSerializable
     /**
      * @return mixed
      */
-    public function getPropertyData()
-    {
-        return $this->propertyData;
-    }
-
-    /**
-     * @param mixed $propertyData
-     *
-     * @return RouteSDKProperties
-     */
-    public function setPropertyData($propertyData)
-    {
-        $this->propertyData = $propertyData;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getArguments()
     {
         return $this->arguments;
@@ -232,5 +213,21 @@ class RouteSDKProperties implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getClassSource()
+    {
+        return $this->classSource;
+    }
 
+    /**
+     * @param mixed $classSource
+     * @return RouteSDKProperties
+     */
+    public function setClassSource($classSource)
+    {
+        $this->classSource = $classSource;
+        return $this;
+    }
 }
