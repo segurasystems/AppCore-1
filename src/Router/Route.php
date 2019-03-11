@@ -255,7 +255,7 @@ class Route
     /**
      * @return mixed
      */
-    public function getSdkProperties(): ?RouteSDKProperties
+    public function getSdkProperties(): ?array
     {
         return $this->sdkProperties;
     }
