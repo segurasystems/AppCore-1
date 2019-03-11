@@ -18,7 +18,7 @@ abstract class Service
         $this->tableAccessLayer = $tableAccessLayer;
     }
 
-    protected function getTableAccessLayer()
+    protected function getAccessLayer()
     {
         return $this->tableAccessLayer;
     }
@@ -43,7 +43,7 @@ abstract class Service
      */
     public function get(Filter $filter)
     {
-        return $this->getTableAccessLayer()
+        return $this->getAccessLayer()
             ->get($filter);
     }
 
@@ -54,7 +54,7 @@ abstract class Service
      */
     public function getAll(Filter $filter): array
     {
-        list($matches, $count) = $this->getTableAccessLayer()
+        list($matches, $count) = $this->getAccessLayer()
             ->getAll($filter);
         $result = [];
         if ($matches instanceof ResultSet) {
@@ -72,7 +72,7 @@ abstract class Service
      */
     public function count(Filter $filter = null): int
     {
-        return $this->getTableAccessLayer()
+        return $this->getAccessLayer()
             ->count($filter);
     }
 }
