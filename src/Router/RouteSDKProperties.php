@@ -206,7 +206,29 @@ class RouteSDKProperties implements \JsonSerializable
      */
     public function setArguments($arguments)
     {
-        $this->arguments = $arguments;
+        $this->arguments = [];
+        $this->addArguments($arguments);
+        return $this;
+    }
+
+    public function addArguments($arguments){
+        foreach ($arguments as $name=>$argument){
+            $this->addArgument($name,$argument);
+        }
+        return $this;
+    }
+
+    public function addArgument(string $name, array $argument)
+    {
+        $argument["name"] = $name;
+        $this->arguments[$name] = [
+            "in" => $argument["in"] ?? "path",
+            "description" => $argument["description"] ?? null,
+            "required" => $argument["required"] ?? false,
+            "default" => $argument["default"] ?? null,
+            "type" => $argument["default"] ?? null,
+            "examples" => $argument["examples"] ?? [],
+        ];
         return $this;
     }
 
