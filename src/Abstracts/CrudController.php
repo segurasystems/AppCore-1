@@ -1,4 +1,5 @@
 <?php
+
 namespace Gone\AppCore\Abstracts;
 
 use Gone\AppCore\Interfaces\ModelInterface;
@@ -9,39 +10,35 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 
 abstract class CrudController extends Controller
 {
-    public function listRequest(Request $request, Response $response) : Response
-    {
-        $objects = [];
-        $service = $this->getService();
-        if ($this->requestHasFilters($request, $response)) {
-            $filterBehaviours = $this->parseFilters($request, $response);
-            $foundObjects     = $service->getAllFilter($filterBehaviours);
-        } else {
-            $foundObjects = $service->getAllFilter(Filter::Factory());
-        }
+    protected $singularTerm = "Data";
+    protected $pluralTerm = "Datas";
 
-        foreach ($foundObjects as $object) {
-            $objects[] = $object->__toPublicArray();
-        }
+
+    protected function listRequest(Request $request, Response $response, $name): Response
+    {
+        $service = $this->getService();
+        $filter = $this->parseFilters($request, $response);
+        // TODO
+        //$this->responder->successResponse($action,$data,$request,$response);
 
         return $this->jsonSuccessResponse(
             [
-                'Action'                        => 'LIST',
-                $this->service->getTermPlural() => $objects,
+                'Action'          => 'LIST',
+                $this->pluralTerm => $service->getAll($filter),
             ],
             $request,
             $response
         );
     }
 
-    public function getRequest(Request $request, Response $response, $args) : Response
+    public function getRequest(Request $request, Response $response, $args): Response
     {
-        $object = $this->getService()->getById($args['id']);
+        $object = $this->getService()->getByPK($args);
         if ($object) {
             return $this->jsonSuccessResponse(
                 [
-                    'Action'                          => 'GET',
-                    $this->service->getTermSingular() => $object->__toArray(),
+                    'Action'            => 'GET',
+                    $this->singularTerm => $object,
                 ],
                 $request,
                 $response
@@ -50,7 +47,7 @@ abstract class CrudController extends Controller
         return $this->jsonFailureResponse(
             sprintf(
                 "No such %s found with id %s",
-                strtolower($this->service->getTermSingular()),
+                strtolower($this->singularTerm),
                 $args['id']
             ),
             $request,
@@ -58,15 +55,15 @@ abstract class CrudController extends Controller
         );
     }
 
-    public function createRequest(Request $request, Response $response, $args) : Response
+    public function updateRequest(Request $request, Response $response, $args): Response
     {
         $newObjectArray = $request->getParsedBody();
         try {
-            $object = $this->getService()->createFromArray($newObjectArray);
+            $object = $this->getService()->update($args, $newObjectArray);
             return $this->jsonSuccessResponse(
                 [
-                    'Action'                          => 'CREATE',
-                    $this->service->getTermSingular() => $object->__toArray(),
+                    'Action'            => 'UPDATE',
+                    $this->singularTerm => $object,
                 ],
                 $request,
                 $response
@@ -76,18 +73,36 @@ abstract class CrudController extends Controller
         }
     }
 
-    public function createBulkRequest(Request $request, Response $response, $args) : Response
+    public function createRequest(Request $request, Response $response, $args): Response
+    {
+        $newObjectArray = $request->getParsedBody();
+        try {
+            $object = $this->getService()->create($newObjectArray);
+            return $this->jsonSuccessResponse(
+                [
+                    'Action'            => 'CREATE',
+                    $this->singularTerm => $object,
+                ],
+                $request,
+                $response
+            );
+        } catch (InvalidQueryException $iqe) {
+            return $this->jsonResponseException($iqe, $request, $response);
+        }
+    }
+
+    public function createBulkRequest(Request $request, Response $response, $args): Response
     {
         $newObjectArray = $request->getParsedBody();
         try {
             $objects = [];
-            foreach ($newObjectArray as $newObjectArrayItem){
-                $objects[] = $this->getService()->createFromArray($newObjectArrayItem)->__toArray();
+            foreach ($newObjectArray as $newObjectArrayItem) {
+                $objects[] = $this->getService()->create($newObjectArrayItem);
             }
             return $this->jsonSuccessResponse(
                 [
-                    'Action'                          => 'CREATE',
-                    $this->service->getTermPlural() => $objects,
+                    'Action'          => 'BULK_CREATE',
+                    $this->pluralTerm => $objects,
                 ],
                 $request,
                 $response
@@ -97,18 +112,43 @@ abstract class CrudController extends Controller
         }
     }
 
-    public function deleteRequest(Request $request, Response $response, $args) : Response
+//    public function deleteRequest(Request $request, Response $response, $args): Response
+//    {
+//        /** @var ModelInterface $object */
+//        $object = $this->getService()->getById($args['id']);
+//        if ($object) {
+//            $array = $object->__toArray();
+//            $object->destroy();
+//
+//            return $this->jsonSuccessResponse(
+//                [
+//                    'Action'                          => 'DELETE',
+//                    $this->service->getTermSingular() => $array,
+//                ],
+//                $request,
+//                $response
+//            );
+//        }
+//        return $this->jsonFailureResponse(
+//            sprintf(
+//                "No such %s found with id %s",
+//                strtolower($this->service->getTermSingular()),
+//                $args['id']
+//            ),
+//            $request,
+//            $response
+//        );
+//    }
+
+    public function updatePKRequest(Request $request, Response $response, $args): Response
     {
         /** @var ModelInterface $object */
-        $object = $this->getService()->getById($args['id']);
+        $object = $this->getService()->updatePK($args['oldPK'], $args['newPK']);
         if ($object) {
-            $array = $object->__toArray();
-            $object->destroy();
-
             return $this->jsonSuccessResponse(
                 [
-                    'Action'                          => 'DELETE',
-                    $this->service->getTermSingular() => $array,
+                    'Action'            => 'UPDATE_PK',
+                    $this->singularTerm => $object,
                 ],
                 $request,
                 $response
@@ -117,33 +157,8 @@ abstract class CrudController extends Controller
         return $this->jsonFailureResponse(
             sprintf(
                 "No such %s found with id %s",
-                strtolower($this->service->getTermSingular()),
-                $args['id']
-            ),
-            $request,
-            $response
-        );
-    }
-
-    public function updateIDRequest(Request $request, Response $response, $args) : Response
-    {
-        /** @var ModelInterface $object */
-        $object = $this->getService()->updatePK($args['oldID'],$args['newID']);
-        if ($object) {
-            return $this->jsonSuccessResponse(
-                [
-                    'Action'                          => 'UPDATE_PK',
-                    $this->service->getTermSingular() => $object->__toArray(),
-                ],
-                $request,
-                $response
-            );
-        }
-        return $this->jsonFailureResponse(
-            sprintf(
-                "No such %s found with id %s",
-                strtolower($this->service->getTermSingular()),
-                $args['oldID']
+                strtolower($this->singularTerm),
+                $args['oldPK']
             ),
             $request,
             $response

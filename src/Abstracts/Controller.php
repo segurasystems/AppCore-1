@@ -128,6 +128,9 @@ abstract class Controller
      */
     protected function parseFilters(Request $request, Response $response) : Filter
     {
-        return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
+        if($this->requestHasFilters($request,$response)) {
+            return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
+        }
+        return Filter::Factory();
     }
 }

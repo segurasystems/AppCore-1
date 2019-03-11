@@ -13,6 +13,8 @@ abstract class Service
     /** @var TableAccessLayer */
     private $tableAccessLayer;
 
+    protected $modelClass;
+
     public function __construct(TableAccessLayer $tableAccessLayer)
     {
         $this->tableAccessLayer = $tableAccessLayer;
@@ -28,13 +30,28 @@ abstract class Service
      * @param $dataArray
      * @return AbstractModel|null
      */
-    abstract public function update($pk, $dataArray);
+    public function update($pk, $dataArray){
+        $model = $this->getByPK($pk);
+        $model->setProperties($dataArray);
+        return $this->getAccessLayer()->update($model);
+    }
 
     /**
      * @param $dataArray
      * @return AbstractModel|null
      */
-    abstract public function create($dataArray);
+    public function create($dataArray){
+        $model = new $this->modelClass($dataArray);
+        return $this->getAccessLayer()->create($model);
+    }
+
+    /**
+     * @param $pk
+     * @return AbstractModel|null
+     */
+    public function getByPK($pk){
+        return $this->getAccessLayer()->getByPK($pk);
+    }
 
     /**
      * @param Filter $filter
@@ -74,5 +91,10 @@ abstract class Service
     {
         return $this->getAccessLayer()
             ->count($filter);
+    }
+
+    public function updatePK($oldPK,$newPK){
+        $model = $this->getByPK($oldPK);
+        return $this->getAccessLayer()->updatePK($newPK);
     }
 }
