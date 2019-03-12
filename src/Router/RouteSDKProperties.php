@@ -36,6 +36,7 @@ class RouteSDKProperties implements \JsonSerializable
             "responseKey" => $this->getResponseKey(),
             "arguments" => $this->getArguments(),
             "responseClass" => $this->getResponseClass(),
+            "class" => $this->getClass(),
         ];
     }
 
