@@ -14,7 +14,7 @@ abstract class CrudController extends Controller
     protected $pluralTerm = "Datas";
 
 
-    public function listRequest(Request $request, Response $response): Response
+    public function getAllRequest(Request $request, Response $response): Response
     {
         $service = $this->getService();
         $filter = $this->parseFilters($request, $response);
