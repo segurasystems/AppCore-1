@@ -46,6 +46,7 @@ class ApiListController extends Controller
                     $models[$className]["singular"] = $class::NAME_SINGULAR;
                     $models[$className]["plural"] = $class::NAME_PLURAL;
                     $models[$className]["properties"] = $class::getPropertyMeta();
+                    $models[$className]["primaryKeys"] = $class::PRIMARY_KEYS;
                     $sdkProperties["responseClass"] = $className;
                     if(empty($sdkProperties["responseKey"])){
                         $sdkProperties["responseKey"] = $sdkProperties["returnsArray"] ? $class::NAME_PLURAL : $class::NAME_SINGULAR;
