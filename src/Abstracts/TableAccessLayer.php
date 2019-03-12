@@ -74,7 +74,7 @@ abstract class TableAccessLayer
             $columns = $structure["columns"];
             $_data = array_filter($data, function ($key) use ($columns) {
                 return in_array($key, $columns);
-            });
+            }, ARRAY_FILTER_USE_KEY);
             $rows += $this->getTableGateway()->update(
                 $_data,
                 $pks
