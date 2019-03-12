@@ -79,7 +79,7 @@ class RouteSDKProperties implements \JsonSerializable
      */
     public function getResponseKey()
     {
-        return $this->responseKey ?? $this->getSingular();
+        return $this->responseKey;
     }
 
     /**
