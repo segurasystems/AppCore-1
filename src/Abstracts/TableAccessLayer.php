@@ -68,7 +68,7 @@ abstract class TableAccessLayer
     {
         $data = $model->__toUpsertArray();
         $pks = $model->getPrimaryKeys();
-        $breakdown = $this->getViewBreakdown();
+        $breakdown = $this->getViewModelBreakdown();
         $rows = 0;
         foreach ($breakdown as $baseTable => $structure) {
             $columns = $structure["columns"];
@@ -100,7 +100,7 @@ abstract class TableAccessLayer
     private function createThroughView(Model $model)
     {
         $data = $model->__toArray();
-        $breakdown = $this->getViewBreakdown();
+        $breakdown = $this->getViewModelBreakdown();
         $inserts = [];
         unset($data["id"]);
         foreach ($breakdown as $baseTable => $structure) {
@@ -128,7 +128,7 @@ abstract class TableAccessLayer
         return $inserted;
     }
 
-    protected function getViewBreakdown()
+    protected function getViewModelBreakdown()
     {
         return [];
     }

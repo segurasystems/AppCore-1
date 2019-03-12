@@ -73,7 +73,7 @@ abstract class CrudController extends Controller
         }
     }
 
-    public function createRequest(Request $request, Response $response, $args): Response
+    public function createRequest(Request $request, Response $response): Response
     {
         $newObjectArray = $request->getParsedBody();
         try {
@@ -91,7 +91,7 @@ abstract class CrudController extends Controller
         }
     }
 
-    public function createBulkRequest(Request $request, Response $response, $args): Response
+    public function createBulkRequest(Request $request, Response $response): Response
     {
         $newObjectArray = $request->getParsedBody();
         try {
