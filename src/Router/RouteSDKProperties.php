@@ -15,6 +15,7 @@ class RouteSDKProperties implements \JsonSerializable
     protected $function;
     protected $hydratable = false;
     protected $responseKey;
+    protected $returnsArray = false;
     protected $responseClass;
     protected $arguments;
 
@@ -37,7 +38,27 @@ class RouteSDKProperties implements \JsonSerializable
             "arguments" => $this->getArguments(),
             "responseClass" => $this->getResponseClass(),
             "class" => $this->getClass(),
+            "returnsArray" => $this->getReturnsArray(),
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function getReturnsArray(): bool
+    {
+        return $this->returnsArray;
+    }
+
+    /**
+     * @param bool $returnsArray
+     *
+     * @return RouteSDKProperties
+     */
+    public function setReturnsArray(bool $returnsArray): RouteSDKProperties
+    {
+        $this->returnsArray = $returnsArray;
+        return $this;
     }
 
     /**

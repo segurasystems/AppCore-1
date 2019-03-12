@@ -48,7 +48,7 @@ class ApiListController extends Controller
                     $models[$className]["propertyData"] = $class::getPropertyMeta();
                     $sdkProperties["responseClass"] = $className;
                     if(empty($sdkProperties["responseKey"])){
-                        $sdkProperties["responseKey"] = $class::NAME_SINGULAR;
+                        $sdkProperties["responseKey"] = $sdkProperties["returnsArray"] ? $class::NAME_PLURAL : $class::NAME_SINGULAR;
                     }
                 }
                 $routeArray = array_merge($routeArray,$sdkProperties);
