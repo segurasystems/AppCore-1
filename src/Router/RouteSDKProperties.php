@@ -129,7 +129,7 @@ class RouteSDKProperties implements \JsonSerializable
             "description" => $argument["description"] ?? null,
             "required" => $argument["required"] ?? false,
             "default" => $argument["default"] ?? null,
-            "type" => $argument["default"] ?? null,
+            "type" => $argument["type"] ?? null,
             "examples" => $argument["examples"] ?? [],
         ];
         return $this;
