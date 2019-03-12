@@ -11,11 +11,11 @@ namespace Gone\AppCore\Router;
 
 class RouteSDKProperties implements \JsonSerializable
 {
-    protected $fakeClass;
+    protected $class;
     protected $function;
     protected $hydratable = false;
     protected $responseKey;
-    protected $classSource;
+    protected $responseClass;
     protected $arguments;
 
     public static function Factory()
@@ -35,7 +35,7 @@ class RouteSDKProperties implements \JsonSerializable
             "hydratable" => $this->isHydratable(),
             "responseKey" => $this->getResponseKey(),
             "arguments" => $this->getArguments(),
-            "classSource" => $this->getClassSource(),
+            "responseClass" => $this->getResponseClass(),
         ];
     }
 
@@ -137,36 +137,38 @@ class RouteSDKProperties implements \JsonSerializable
     /**
      * @return mixed
      */
-    public function getClassSource()
+    public function getResponseClass()
     {
-        return $this->classSource;
+        return $this->responseClass;
     }
 
     /**
-     * @param mixed $classSource
+     * @param mixed $responseClass
+     *
      * @return RouteSDKProperties
      */
-    public function setClassSource($classSource)
+    public function setResponseClass($responseClass)
     {
-        $this->classSource = $classSource;
+        $this->responseClass = $responseClass;
         return $this;
     }
 
     /**
      * @return mixed
      */
-    public function getFakeClass()
+    public function getClass()
     {
-        return $this->fakeClass;
+        return $this->class;
     }
 
     /**
-     * @param mixed $fakeClass
+     * @param mixed $class
+     *
      * @return RouteSDKProperties
      */
-    public function setFakeClass($fakeClass)
+    public function setClass($class)
     {
-        $this->fakeClass = $fakeClass;
+        $this->class = $class;
         return $this;
     }
 

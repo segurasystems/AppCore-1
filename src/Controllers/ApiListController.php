@@ -40,13 +40,13 @@ class ApiListController extends Controller
                     'SDKProperties'     => $route->getSdkProperties(),
                 ];
                 if (!empty($routeArray["SDKProperties"]["classSource"])) {
-                    $class = $routeArray["SDKProperties"]["classSource"];
+                    $class = $routeArray["SDKProperties"]["responseClass"];
                     $className = $class::NAME_SINGULAR;
                     $models[$className]["table"] = $class::TABLE_NAME;
                     $models[$className]["singular"] = $class::NAME_SINGULAR;
                     $models[$className]["plural"] = $class::NAME_PLURAL;
                     $models[$className]["propertyData"] = $class::getPropertyMeta();
-                    $routeArray["SDKProperties"]["classSource"] = $className;
+                    $routeArray["SDKProperties"]["responseClass"] = $className;
                 }
 
                 $json['Routes'][] = array_filter($routeArray);
