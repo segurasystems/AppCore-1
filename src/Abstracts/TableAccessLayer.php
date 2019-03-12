@@ -57,7 +57,7 @@ abstract class TableAccessLayer
         } else {
             $this->getTableGateway()
                 ->update(
-                    $model->__toUpsertArray(),
+                    $model->__toDirtyArray(),
                     $model->getPrimaryKeys()
                 );
         }
@@ -66,7 +66,7 @@ abstract class TableAccessLayer
 
     private function updateThroughView(Model $model)
     {
-        $data = $model->__toUpsertArray();
+        $data = $model->__toDirtyArray();
         $pks = $model->getPrimaryKeys();
         $breakdown = $this->getViewModelBreakdown();
         $rows = 0;
