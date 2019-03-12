@@ -38,7 +38,7 @@ class ApiListController extends Controller
 //                    'tableName'          => $route->getSDKTableName(),
 //                    'responseKey'        => $route->getSDKResponseKey(),
                 ];
-                $sdkProperties = $route->getSdkProperties();
+                $sdkProperties = $route->getSdkProperties() ?? [];
                 if (!empty($sdkProperties["responseClass"])) {
                     $class = $sdkProperties["responseClass"];
                     $className = $class::NAME_SINGULAR;
