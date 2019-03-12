@@ -11,13 +11,9 @@ namespace Gone\AppCore\Router;
 
 class RouteSDKProperties implements \JsonSerializable
 {
-    protected $class;
     protected $function;
     protected $hydratable = false;
-    protected $tableName;
     protected $responseKey;
-    protected $singular;
-    protected $plural;
     protected $classSource;
     protected $arguments;
 
@@ -34,34 +30,12 @@ class RouteSDKProperties implements \JsonSerializable
     public function __toArray()
     {
         return [
-            "class" => $this->getClass(),
             "function" => $this->getFunction(),
             "hydratable" => $this->isHydratable(),
-            "tableName" => $this->getTableName(),
             "responseKey" => $this->getResponseKey(),
-            "singular" => $this->getSingular(),
-            "plural" => $this->getPlural(),
             "arguments" => $this->getArguments(),
             "classSource" => $this->getClassSource(),
         ];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getClass()
-    {
-        return $this->class;
-    }
-
-    /**
-     * @param mixed $class
-     * @return RouteSdkProperties
-     */
-    public function setClass($class)
-    {
-        $this->class = $class;
-        return $this;
     }
 
     /**
@@ -103,24 +77,6 @@ class RouteSDKProperties implements \JsonSerializable
     /**
      * @return mixed
      */
-    public function getTableName()
-    {
-        return $this->tableName;
-    }
-
-    /**
-     * @param mixed $tableName
-     * @return RouteSdkProperties
-     */
-    public function setTableName($tableName)
-    {
-        $this->tableName = $tableName;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getResponseKey()
     {
         return $this->responseKey ?? $this->getSingular();
@@ -133,42 +89,6 @@ class RouteSDKProperties implements \JsonSerializable
     public function setResponseKey($responseKey)
     {
         $this->responseKey = $responseKey;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSingular()
-    {
-        return $this->singular;
-    }
-
-    /**
-     * @param mixed $singular
-     * @return RouteSdkProperties
-     */
-    public function setSingular($singular)
-    {
-        $this->singular = $singular;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPlural()
-    {
-        return $this->plural;
-    }
-
-    /**
-     * @param mixed $plural
-     * @return RouteSdkProperties
-     */
-    public function setPlural($plural)
-    {
-        $this->plural = $plural;
         return $this;
     }
 

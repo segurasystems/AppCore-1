@@ -15,6 +15,7 @@ class ApiListController extends Controller
         if ($request->getContentType() == "application/json" || $request->getHeader("Accept")[0] == "application/json") {
             $json           = [];
             $json['Status'] = "Okay";
+            $models = [];
             foreach (Router::Instance()->getRoutes() as $route) {
                 $routeArray = [
                     'name'               => $route->getName(),
@@ -38,9 +39,20 @@ class ApiListController extends Controller
 //                    'responseKey'        => $route->getSDKResponseKey(),
                     'SDKProperties'     => $route->getSdkProperties(),
                 ];
+                if (!empty($routeArray["SDKProperties"]["classSource"])) {
+                    $class = $routeArray["SDKProperties"]["classSource"];
+                    $className = $class::NAME_SINGULAR;
+                    $models[$className]["propertyData"] = $class::getPropertyMeta();
+                    $models[$className]["table"] = $class::TABLE_NAME;
+                    $models[$className]["singular"] = $class::NAME_SINGULAR;
+                    $models[$className]["plural"] = $class::NAME_PLURAL;
+                    $models[$className]["class"] = $class::NAME_SINGULAR;
+                    $routeArray["SDKProperties"]["classSource"] = $className;
+                }
 
                 $json['Routes'][] = array_filter($routeArray);
             }
+            $json["Models"] = $models;
             return $this->jsonResponse($json, $request, $response);
         }
         $router = App::Container()->get("router");
