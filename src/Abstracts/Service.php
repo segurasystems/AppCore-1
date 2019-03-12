@@ -26,14 +26,17 @@ abstract class Service
     }
 
     /**
-     * @param $pk
-     * @param $dataArray
+     * @param AbstractModel $model
      * @return AbstractModel|null
      */
+    public function save(AbstractModel $model){
+        return $this->getAccessLayer()->save($model);
+    }
+
     public function update($pk, $dataArray){
         $model = $this->getByPK($pk);
         $model->setProperties($dataArray);
-        return $this->getAccessLayer()->update($model);
+        $this->save($model);
     }
 
     /**
@@ -42,7 +45,7 @@ abstract class Service
      */
     public function create($dataArray){
         $model = new $this->modelClass($dataArray);
-        return $this->getAccessLayer()->create($model);
+        return $this->save($model);
     }
 
     /**

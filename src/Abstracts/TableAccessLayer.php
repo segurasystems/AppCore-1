@@ -50,6 +50,17 @@ abstract class TableAccessLayer
         return $this->getTableGateway()->getSql();
     }
 
+    public function save(Model $model){
+        $pks = $model->getPrimaryKeys();
+        $pkCount = count($pks);
+        $pks = array_filter($pks);
+        if(count($pks) == $pkCount){
+            //$oldModel = $this->getByPK($pks);
+            return $this->update($model);
+        }
+        return $this->create($model);
+    }
+
     public function update(Model $model)
     {
         if ($this->isView) {
