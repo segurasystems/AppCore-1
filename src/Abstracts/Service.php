@@ -71,15 +71,8 @@ abstract class Service
      */
     public function getAll(Filter $filter): array
     {
-        list($matches, $count) = $this->getAccessLayer()
+        return $this->getAccessLayer()
             ->getAll($filter);
-        $result = [];
-        if ($matches instanceof ResultSet) {
-            foreach ($matches as $match) {
-                $result[] = $match;
-            }
-        }
-        return $result;
     }
 
     /**
