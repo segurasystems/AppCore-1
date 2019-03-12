@@ -37,17 +37,18 @@ class ApiListController extends Controller
 //                    'hydratable'         => $route->getSDKHydrate(),
 //                    'tableName'          => $route->getSDKTableName(),
 //                    'responseKey'        => $route->getSDKResponseKey(),
-                    'SDKProperties'     => $route->getSdkProperties(),
                 ];
-                if (!empty($routeArray["SDKProperties"]["classSource"])) {
-                    $class = $routeArray["SDKProperties"]["responseClass"];
+                $sdkProperties = $route->getSdkProperties();
+                if (!empty($sdkProperties["responseClass"])) {
+                    $class = $sdkProperties["responseClass"];
                     $className = $class::NAME_SINGULAR;
                     $models[$className]["table"] = $class::TABLE_NAME;
                     $models[$className]["singular"] = $class::NAME_SINGULAR;
                     $models[$className]["plural"] = $class::NAME_PLURAL;
                     $models[$className]["propertyData"] = $class::getPropertyMeta();
-                    $routeArray["SDKProperties"]["responseClass"] = $className;
+                    $sdkProperties["responseClass"] = $className;
                 }
+                $routeArray = array_merge($routeArray,$sdkProperties);
 
                 $json['Routes'][] = array_filter($routeArray);
             }
