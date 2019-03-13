@@ -36,14 +36,12 @@ class JSONResponseLinter
         } catch (\Exception $exception) {
             $trace = array_map(function($a){return "{$a["file"]}: {$a["line"]}";},$exception->getTrace());
             array_walk($trace, function (&$elem) {
-                $pieces = explode(" ", $elem, 2);
-                $elem = $pieces[1];
                 $highlightLocations = [
                     '/app/src/',
                     '/app/tests/'
                 ];
                 foreach ($highlightLocations as $highlightLocation) {
-                    if (substr($elem, 0, strlen($highlightLocation)) == $highlightLocation) {
+                    if (strpos($elem, $highlightLocation) == 0) {
                         $elem = "*** {$elem}";
                     }
                 }
