@@ -31,9 +31,9 @@ class CORSHeadersOnResponse
                 }
             }
         }
-        if (empty($domainRegexs)) {
-            throw new \Exception("Invalid domainRegex for CORS Middleware. Expected string or array");
-        }
+//        if (empty($domainRegexs)) {
+//            throw new \Exception("Invalid domainRegex for CORS Middleware. Expected string or array");
+//        }
         $this->domainRegexs = $domainRegexs;
     }
 
