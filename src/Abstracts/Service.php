@@ -36,7 +36,7 @@ abstract class Service
     public function update($pk, $dataArray){
         $model = $this->getByPK($pk);
         $model->setProperties($dataArray);
-        $this->save($model);
+        return $this->save($model);
     }
 
     /**
