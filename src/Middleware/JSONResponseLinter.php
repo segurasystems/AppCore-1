@@ -34,7 +34,7 @@ class JSONResponseLinter
             }
             return $response;
         } catch (\Exception $exception) {
-            $trace = explode("\n", $exception->getTraceAsString());
+            $trace = array_map(function($a){return "{$a["file"]}: {$a["line"]}";},$exception->getTrace());
             array_walk($trace, function (&$elem) {
                 $pieces = explode(" ", $elem, 2);
                 $elem = $pieces[1];
