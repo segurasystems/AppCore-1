@@ -111,7 +111,7 @@ abstract class Controller
             $filterText = trim($request->getHeader('Filter')[0]);
             if (!empty($filterText)) {
                 $decode = json_decode($filterText,true);
-                if ($decode !== null || $filterText !== "null") {
+                if ($decode !== null || $filterText === "null") {
                     return true;
                 }
                 throw new FilterDecodeException("Could not decode given Filter. Reason: Not JSON. Given: \"" . $filterText . "\"");
