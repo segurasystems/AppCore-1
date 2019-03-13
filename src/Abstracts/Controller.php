@@ -2,6 +2,7 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\AppCore\Controllers\InlineCssTrait;
+use Gone\SDK\Common\Exceptions\FilterDecodeException;
 use Gone\SDK\Common\Filters\Filter;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -109,7 +110,7 @@ abstract class Controller
         if ($request->hasHeader("Filter")) {
             $filterText = trim($request->getHeader('Filter')[0]);
             if (!empty($filterText)) {
-                $decode = json_decode($filterText);
+                $decode = json_decode($filterText,true);
                 if ($decode !== null) {
                     return true;
                 }
