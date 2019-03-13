@@ -41,7 +41,7 @@ class JSONResponseLinter
                     '/app/tests/'
                 ];
                 foreach ($highlightLocations as $highlightLocation) {
-                    if (strpos($elem, $highlightLocation) == 0) {
+                    if (strpos($elem, $highlightLocation) === 0) {
                         $elem = "*** {$elem}";
                     }
                 }
