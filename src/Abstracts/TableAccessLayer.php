@@ -51,7 +51,7 @@ abstract class TableAccessLayer
     }
 
     public function save(Model $model){
-        $pks = $model->getPrimaryKeys();
+        $pks = $model->getOriginalPrimaryKeys();
         $pkCount = count($pks);
         $pks = array_filter($pks);
         if(count($pks) == $pkCount){
