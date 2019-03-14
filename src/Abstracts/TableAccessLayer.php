@@ -252,7 +252,7 @@ abstract class TableAccessLayer
         $result = $this->getAllFields([$field], $filter);
         array_walk($this->getAllFields([$field], $filter),function($item,$key) use($field,$type){
             $item = $item[$field];
-            if($type){
+            if($item !== null && $type){
                 switch ($type){
                     case "int":
                     case "integer":
