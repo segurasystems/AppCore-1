@@ -28,34 +28,53 @@ class EnvironmentHeadersOnResponse
 
             $json = json_decode($body->getContents(), true);
 
-            $gitVersion = null;
-            if (file_exists(APP_ROOT . "/version.txt")) {
-                $gitVersion = trim(file_get_contents(APP_ROOT . "/version.txt"));
-                $gitVersion = explode(" ", $gitVersion, 2);
-                $gitVersion = reset($gitVersion);
-            }
+            if (defined('DEBUG_ENABLED') && DEBUG_ENABLED) {
 
-            $json['Extra'] = array_filter([
-                '_Warning' => "Do not depend on any variables inside this block - This is for debug only!",
-                'Hostname'   => gethostname(),
-                'DebugEnabled' => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? 'Yes' : 'No',
-                'GitVersion' => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? $gitVersion : null,
-                'Time'       => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? [
-                    'TimeZone'    => date_default_timezone_get(),
-                    'CurrentTime' => [
-                        'Human' => date("Y-m-d H:i:s"),
-                        'Epoch' => time(),
+                $gitVersion = null;
+                if (file_exists(APP_ROOT . "/version.txt")) {
+                    $gitVersion = trim(file_get_contents(APP_ROOT . "/version.txt"));
+                    $gitVersion = explode(" ", $gitVersion, 2);
+                    $gitVersion = reset($gitVersion);
+                }
+
+                $sqlQueries = $profiler->getQueriesArray();
+                $sqlQueryTime = 0;
+                foreach ($sqlQueries as $query) {
+                    $sqlQueryTime += $query["Time"];
+                }
+
+                $sqlQueryData = [
+                    "Requests" => $sqlQueries,
+                    "Time"     => $sqlQueryTime,
+                ];
+
+                $json['Extra'] = array_filter([
+                    '_Warning'   => "Do not depend on any variables inside this block - This is for debug only!",
+                    'Hostname'   => gethostname(),
+                    //'DebugEnabled' => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? 'Yes' : 'No',
+                    'GitVersion' => $gitVersion,
+                    'Time'       => [
+                        'TimeZone'    => date_default_timezone_get(),
+                        'CurrentTime' => [
+                            'Human' => date("Y-m-d H:i:s"),
+                            'Epoch' => time(),
+                        ],
+                        'Exec'        => number_format(microtime(true) - APP_START, 4) . " sec",
                     ],
-                    'Exec'   => number_format(microtime(true) - APP_START, 4) . " sec",
-                ] : null,
-                'Memory'     => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? [
-                    'Used'       => number_format(memory_get_usage(false)/1024/1024, 2) . "MB",
-                    'Allocated'  => number_format(memory_get_usage(true)/1024/1024, 2) . "MB",
-                    'Limit'      => ini_get('memory_limit'),
-                ] : null,
-                'SQL' => defined('DEBUG_ENABLED') && DEBUG_ENABLED ? $profiler->getQueriesArray() : null,
-                'API' => defined('DEBUG_ENABLED') && DEBUG_ENABLED && class_exists('\Gone\SDK\Common\Profiler') ? \Gone\SDK\Common\Profiler::debugArray() : null,
-            ]);
+                    'Memory'     => [
+                        'Used'      => number_format(memory_get_usage(false) / 1024 / 1024, 2) . "MB",
+                        'Allocated' => number_format(memory_get_usage(true) / 1024 / 1024, 2) . "MB",
+                        'Limit'     => ini_get('memory_limit'),
+                    ],
+                    'SQL'        => $sqlQueryData,
+                    'API'        => class_exists('\Gone\SDK\Common\Profiler')
+                        ? \Gone\SDK\Common\Profiler::debugArray()
+                        : [
+                            "Requests" => [],
+                            "Time"     => []
+                        ],
+                ]);
+            }
 
             if (isset($json['Status'])) {
                 if (strtolower($json['Status']) != "okay") {
@@ -65,9 +84,9 @@ class EnvironmentHeadersOnResponse
                 }
             }
 
-            if (($request->hasHeader('Content-type') && stripos($request->getHeader('Content-type')[0], 'application/json') !== false)  ||
-                ($request->hasHeader('Accept') && stripos($request->getHeader('Accept')[0], 'application/json') !== false)  ||
-                $this->apiExplorerEnabled === false
+            if (($request->hasHeader('Content-type') && stripos($request->getHeader('Content-type')[0], 'application/json') !== false)
+                || ($request->hasHeader('Accept') && stripos($request->getHeader('Accept')[0], 'application/json') !== false)
+                || $this->apiExplorerEnabled === false
             ) {
                 $response = $response->withJson($json, null, JSON_PRETTY_PRINT);
             } else {
