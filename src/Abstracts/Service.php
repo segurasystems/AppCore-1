@@ -21,7 +21,8 @@ abstract class Service
         $this->__afterConstruct();
     }
 
-    protected function __afterConstruct(){
+    protected function __afterConstruct()
+    {
 
     }
 
@@ -32,13 +33,16 @@ abstract class Service
 
     /**
      * @param AbstractModel $model
+     *
      * @return AbstractModel|null
      */
-    public function save(AbstractModel $model){
+    public function save(AbstractModel $model)
+    {
         return $this->getAccessLayer()->save($model);
     }
 
-    public function update($pk, $dataArray){
+    public function update($pk, $dataArray)
+    {
         $model = $this->getByPK($pk);
         $model->setProperties($dataArray);
         return $this->save($model);
@@ -46,18 +50,22 @@ abstract class Service
 
     /**
      * @param $dataArray
+     *
      * @return AbstractModel|null
      */
-    public function create($dataArray){
+    public function create($dataArray)
+    {
         $model = new $this->modelClass($dataArray);
         return $this->save($model);
     }
 
     /**
      * @param $pk
+     *
      * @return AbstractModel|null
      */
-    public function getByPK($pk){
+    public function getByPK($pk)
+    {
         return $this->getAccessLayer()->getByPK($pk);
     }
 
@@ -94,11 +102,13 @@ abstract class Service
             ->count($filter);
     }
 
-    public function getAllField(string $field,Filter $filter = null){
-        return $this->getAccessLayer()->getAllField($field,$filter);
+    public function getAllField(string $field, Filter $filter = null, $type = null)
+    {
+        return $this->getAccessLayer()->getAllField($field, $filter, $type);
     }
 
-    public function getAllFields(array $fields,Filter $filter = null){
-        return $this->getAccessLayer()->getAllFields($fields,$filter);
+    public function getAllFields(array $fields, Filter $filter = null)
+    {
+        return $this->getAccessLayer()->getAllFields($fields, $filter);
     }
 }
