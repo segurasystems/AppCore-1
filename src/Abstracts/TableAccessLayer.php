@@ -23,16 +23,21 @@ use Gone\SDK\Common\Abstracts\AbstractModel as Model;
 
 abstract class TableAccessLayer
 {
-    private $tableGateway;
+    private $_tableGateway;
+    private $_rawTableGateway;
     protected $modelClass;
     protected $isView;
+
     protected $table;
 
-    public function __construct(AdapterInterface $adapter, $table, $features = null)
+    private $_adapter;
+    private $_zendFeatures;
+
+    public function __construct(AdapterInterface $adapter, $table, $zendfeatures = null)
     {
-        $sql = new ZendSQL($adapter, $this->getTable());
-        $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->modelClass);
-        $this->tableGateway = new TableGateway($this->getTable(), $adapter, $features, $resultSetPrototype, $sql);
+        $this->table = $table;
+        $this->_adapter = $adapter;
+        $this->_zendFeatures = $zendfeatures;
     }
 
     public function getTable()
@@ -40,9 +45,21 @@ abstract class TableAccessLayer
         return $this->table;
     }
 
+    protected function getRawTableGateway()
+    {
+        if (!isset($this->_rawTableGateway)) {
+            $this->_rawTableGateway = new TableGateway($this->getTable(), $this->_adapter, $this->_zendFeatures);
+        }
+        return $this->_rawTableGateway;
+    }
+
     protected function getTableGateway()
     {
-        return $this->tableGateway;
+        if (!isset($this->_tableGateway)) {
+            $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->modelClass);
+            $this->_tableGateway = new TableGateway($this->getTable(), $this->_adapter, $this->_zendFeatures, $resultSetPrototype);
+        }
+        return $this->_tableGateway;
     }
 
     protected function getSQL()
@@ -232,7 +249,7 @@ abstract class TableAccessLayer
 
     public function getAllField(string $field, Filter $filter = null)
     {
-        $fields = $this->getAllFields([$field], $filter);
+        return array_column($this->getAllFields([$field], $filter), $field);
     }
 
     public function getAllFields(array $fields, Filter $filter = null)
@@ -240,7 +257,7 @@ abstract class TableAccessLayer
         $select = $this->getSQL()->select();
         $this->applyFilterToSelect($select, $filter);
         $select->columns($fields);
-        return $this->getWithSelect($select);
+        return $this->getWithSelectRaw($select);
     }
 
     /**
@@ -268,6 +285,18 @@ abstract class TableAccessLayer
     private function getWithSelect(Select $select)
     {
         $resultSet = $this->getTableGateway()->selectWith($select);
+        $results = [];
+        for ($i = 0; $i < $resultSet->count(); $i++) {
+            $results[] = $resultSet->current();
+            $resultSet->next();
+        }
+        return $results;
+    }
+
+    private function getWithSelectRaw(Select $select)
+    {
+
+        $resultSet = $this->getRawTableGateway()->selectWith($select);
         $results = [];
         for ($i = 0; $i < $resultSet->count(); $i++) {
             $results[] = $resultSet->current();
