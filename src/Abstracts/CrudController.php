@@ -140,28 +140,28 @@ abstract class CrudController extends Controller
 //        );
 //    }
 
-    public function updatePKRequest(Request $request, Response $response, $args): Response
-    {
-        /** @var ModelInterface $object */
-        $object = $this->getService()->updatePK($args['oldPK'], $args['newPK']);
-        if ($object) {
-            return $this->jsonSuccessResponse(
-                [
-                    'Action'            => 'UPDATE_PK',
-                    $this->singularTerm => $object,
-                ],
-                $request,
-                $response
-            );
-        }
-        return $this->jsonFailureResponse(
-            sprintf(
-                "No such %s found with id %s",
-                strtolower($this->singularTerm),
-                $args['oldPK']
-            ),
-            $request,
-            $response
-        );
-    }
+//    public function updatePKRequest(Request $request, Response $response, $args): Response
+//    {
+//        /** @var ModelInterface $object */
+//        $object = $this->getService()->updatePK($args['oldPK'], $args['newPK']);
+//        if ($object) {
+//            return $this->jsonSuccessResponse(
+//                [
+//                    'Action'            => 'UPDATE_PK',
+//                    $this->singularTerm => $object,
+//                ],
+//                $request,
+//                $response
+//            );
+//        }
+//        return $this->jsonFailureResponse(
+//            sprintf(
+//                "No such %s found with id %s",
+//                strtolower($this->singularTerm),
+//                $args['oldPK']
+//            ),
+//            $request,
+//            $response
+//        );
+//    }
 }
