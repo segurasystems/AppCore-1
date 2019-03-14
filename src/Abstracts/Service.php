@@ -102,13 +102,13 @@ abstract class Service
             ->count($filter);
     }
 
-    public function getAllField(string $field, Filter $filter = null, $type = null)
+    public function getAllField(string $field, Filter $filter = null, string $type = null)
     {
         return $this->getAccessLayer()->getAllField($field, $filter, $type);
     }
 
-    public function getAllFields(array $fields, Filter $filter = null)
+    public function getAllFields(array $fields, Filter $filter = null, array $types = [])
     {
-        return $this->getAccessLayer()->getAllFields($fields, $filter);
+        return $this->getAccessLayer()->getAllFields($fields, $filter, $types);
     }
 }

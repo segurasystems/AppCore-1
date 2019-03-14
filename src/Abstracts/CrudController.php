@@ -17,7 +17,7 @@ abstract class CrudController extends Controller
     public function getAllRequest(Request $request, Response $response): Response
     {
         $service = $this->getService();
-        $filter = $this->parseFilters($request, $response);
+        $filter = $this->parseFilters($request);
         // TODO
         //$this->responder->successResponse($action,$data,$request,$response);
 
@@ -110,6 +110,36 @@ abstract class CrudController extends Controller
         } catch (InvalidQueryException $iqe) {
             return $this->jsonResponseException($iqe, $request, $response);
         }
+    }
+
+    public function getFieldsRequest(Request $request, Response $response): Response
+    {
+        $filter = $this->parseFilters($request);
+        $fields = $request->getHeader("Fields") ?? "[]";
+        $fields = json_decode($fields, true) ?? [];
+        $types = $request->getHeader("Types") ?? "[]";
+        $types = json_decode($types, true) ?? [];
+
+        $count = count($fields);
+
+        if ($count > 1) {
+            $result = $this->getService()->getAllFields($fields, $filter, $types);
+        } else {
+            if ($count === 1) {
+                $field = $fields[0];
+                $result = $this->getService()->getAllField($field, $filter, $types[$field] ?? null);
+            } else {
+                $result = [];
+            }
+        }
+        return $this->jsonSuccessResponse(
+            [
+                'Action'          => 'LIST_FIELDS',
+                $this->pluralTerm => $result,
+            ],
+            $request,
+            $response
+        );
     }
 
 //    public function deleteRequest(Request $request, Response $response, $args): Response

@@ -105,7 +105,7 @@ abstract class Controller
      *
      * @return bool
      */
-    protected function requestHasFilters(Request $request, Response $response) : bool
+    protected function requestHasFilters(Request $request) : bool
     {
         if ($request->hasHeader("Filter")) {
             $filterText = trim($request->getHeader('Filter')[0]);
@@ -127,9 +127,9 @@ abstract class Controller
      * @return Filter
      * @throws \Gone\SDK\Common\Exceptions\FilterDecodeException
      */
-    protected function parseFilters(Request $request, Response $response) : Filter
+    protected function parseFilters(Request $request) : Filter
     {
-        if($this->requestHasFilters($request,$response)) {
+        if($this->requestHasFilters($request)) {
             return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
         }
         return Filter::Factory();

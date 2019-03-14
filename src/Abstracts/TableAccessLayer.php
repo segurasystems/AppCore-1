@@ -247,34 +247,36 @@ abstract class TableAccessLayer
         return $this->getWithSelect($select);
     }
 
-    public function getAllField(string $field, Filter $filter = null, $type = null)
+    public function getAllField(string $field, Filter $filter = null, string $type = null)
     {
-        $result = $this->getAllFields([$field], $filter);
-        array_walk($this->getAllFields([$field], $filter),function($item,$key) use($field,$type){
-            $item = $item[$field];
-            if($item !== null && $type){
-                switch ($type){
-                    case "int":
-                    case "integer":
-                        $item = intval($item);
-                        break;
-                    case "decimal":
-                    case "float":
-                    case "double":
-                        $item = floatval($item);
-                        break;
-                }
-            }
-        });
-        return $result;
+        return array_column($this->getAllFields([$field], $filter, [$field => $type]), $field);
     }
 
-    public function getAllFields(array $fields, Filter $filter = null)
+    public function getAllFields(array $fields, Filter $filter = null, array $types = [])
     {
         $select = $this->getSQL()->select();
         $this->applyFilterToSelect($select, $filter);
         $select->columns($fields);
-        return $this->getWithSelectRaw($select);
+        return array_map(function ($item) use ($types) {
+            foreach ($types as $field => $type) {
+                if (isset($item[$field]) && $type) {
+                    $value = $item[$field];
+                    switch ($type) {
+                        case "int":
+                        case "integer":
+                            $value = intval($value);
+                            break;
+                        case "decimal":
+                        case "float":
+                        case "double":
+                            $value = floatval($value);
+                            break;
+                    }
+                    $item[$field] = $value;
+                }
+            }
+            return $item;
+        }, $this->getWithSelectRaw($select));
     }
 
     /**
