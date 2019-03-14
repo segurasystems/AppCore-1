@@ -104,7 +104,7 @@ abstract class Service
 
     public function getAllField(string $field, Filter $filter = null, string $type = null)
     {
-        return array_column($this->getAllFields([$field], $filter, [$field => $type]), $field);
+        return $this->getAccessLayer()->getAllField($field, $filter, $type);
     }
 
     public function getAllFields(array $fields, Filter $filter = null, array $types = [])
