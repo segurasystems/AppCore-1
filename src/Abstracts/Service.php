@@ -18,6 +18,11 @@ abstract class Service
     public function __construct(TableAccessLayer $tableAccessLayer)
     {
         $this->tableAccessLayer = $tableAccessLayer;
+        $this->__afterConstruct();
+    }
+
+    protected function __afterConstruct(){
+
     }
 
     protected function getAccessLayer()
