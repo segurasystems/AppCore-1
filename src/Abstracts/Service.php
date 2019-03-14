@@ -94,8 +94,7 @@ abstract class Service
             ->count($filter);
     }
 
-    public function updatePK($oldPK,$newPK){
-        $model = $this->getByPK($oldPK);
-        return $this->getAccessLayer()->updatePK($newPK);
+    public function getAllFields(array $fields,Filter $filter = null){
+        return $this->getAccessLayer()->getAllFields($fields,$filter);
     }
 }

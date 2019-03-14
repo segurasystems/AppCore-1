@@ -50,11 +50,12 @@ abstract class TableAccessLayer
         return $this->getTableGateway()->getSql();
     }
 
-    public function save(Model $model){
+    public function save(Model $model)
+    {
         $pks = $model->getOriginalPrimaryKeys();
         $pkCount = count($pks);
         $pks = array_filter($pks);
-        if(count($pks) == $pkCount){
+        if (count($pks) == $pkCount) {
             //$oldModel = $this->getByPK($pks);
             return $this->update($model);
         }
@@ -86,7 +87,7 @@ abstract class TableAccessLayer
             $_data = array_filter($data, function ($key) use ($columns) {
                 return in_array($key, $columns);
             }, ARRAY_FILTER_USE_KEY);
-            if(!empty($_data)) {
+            if (!empty($_data)) {
                 $rows += $this->getTableGateway()->update(
                     $_data,
                     $pks
@@ -148,6 +149,7 @@ abstract class TableAccessLayer
 
     /**
      * @param $_pk
+     *
      * @return AbstractModel|null
      */
     public function getByPK($_pk)
@@ -161,9 +163,10 @@ abstract class TableAccessLayer
     }
 
     /**
-     * @param array $keyValue
-     * @param null $orderBy
+     * @param array  $keyValue
+     * @param null   $orderBy
      * @param string $orderDirection
+     *
      * @return AbstractModel|null
      */
     public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_DESCENDING)
@@ -176,10 +179,11 @@ abstract class TableAccessLayer
     }
 
     /**
-     * @param array $keyValue
-     * @param null $orderBy
-     * @param string $orderDirection
+     * @param array    $keyValue
+     * @param null     $orderBy
+     * @param string   $orderDirection
      * @param int|null $limit
+     *
      * @return AbstractModel[]
      */
     public function getAllMatching(
@@ -201,6 +205,7 @@ abstract class TableAccessLayer
 
     /**
      * @param Filter $filter
+     *
      * @return AbstractModel|null
      */
     public function get(Filter $filter)
@@ -215,6 +220,7 @@ abstract class TableAccessLayer
 
     /**
      * @param Filter|null $filter
+     *
      * @return AbstractModel[]
      */
     public function getAll(Filter $filter = null)
@@ -224,8 +230,22 @@ abstract class TableAccessLayer
         return $this->getWithSelect($select);
     }
 
+    public function getAllField(string $field, Filter $filter = null)
+    {
+        $fields = $this->getAllFields([$field], $filter);
+    }
+
+    public function getAllFields(array $fields, Filter $filter = null)
+    {
+        $select = $this->getSQL()->select();
+        $this->applyFilterToSelect($select, $filter);
+        $select->columns($fields);
+        return $this->getWithSelect($select);
+    }
+
     /**
      * @param Filter|null $filter
+     *
      * @return int
      */
     public function count(Filter $filter = null)
@@ -242,6 +262,7 @@ abstract class TableAccessLayer
 
     /**
      * @param Select $select
+     *
      * @return array
      */
     private function getWithSelect(Select $select)
