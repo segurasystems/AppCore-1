@@ -247,11 +247,6 @@ abstract class TableAccessLayer
         return $this->getWithSelect($select);
     }
 
-    public function getAllField(string $field, Filter $filter = null, string $type = null)
-    {
-        return array_column($this->getAllFields([$field], $filter, [$field => $type]), $field);
-    }
-
     public function getAllFields(array $fields, Filter $filter = null, array $types = [])
     {
         $select = $this->getSQL()->select();
