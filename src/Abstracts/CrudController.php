@@ -115,9 +115,9 @@ abstract class CrudController extends Controller
     public function getFieldsRequest(Request $request, Response $response): Response
     {
         $filter = $this->parseFilters($request);
-        $fields = $request->getHeader("Fields") ?? "[]";
+        $fields = $request->getHeader("Fields")[0] ?? "[]";
         $fields = json_decode($fields, true) ?? [];
-        $types = $request->getHeader("Types") ?? "[]";
+        $types = $request->getHeader("Types")[0] ?? "[]";
         $types = json_decode($types, true) ?? [];
 
         $count = count($fields);
