@@ -69,7 +69,7 @@ abstract class TableAccessLayer
             $this->getTableGateway()
                 ->update(
                     $model->__toDirtyArray(),
-                    $model->getPrimaryKeys()
+                    $model->getOriginalPrimaryKeys()
                 );
         }
         return $this->getMatching($model->getPrimaryKeys());
@@ -78,7 +78,7 @@ abstract class TableAccessLayer
     private function updateThroughView(Model $model)
     {
         $data = $model->__toDirtyArray();
-        $pks = $model->getPrimaryKeys();
+        $pks = $model->getOriginalPrimaryKeys();
         $breakdown = $this->getViewModelBreakdown();
         $rows = 0;
         foreach ($breakdown as $baseTable => $structure) {
