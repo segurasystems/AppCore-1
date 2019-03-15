@@ -40,7 +40,7 @@ class EnvironmentHeadersOnResponse
                 $sqlQueries = $profiler->getQueriesArray();
                 $sqlQueryTime = 0;
                 foreach ($sqlQueries as $query) {
-                    $sqlQueryTime += $query["Time"];
+                    $sqlQueryTime += floatval($query["Time"]);
                 }
 
                 $sqlQueryData = [
