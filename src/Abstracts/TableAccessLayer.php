@@ -81,6 +81,7 @@ abstract class TableAccessLayer
 
     public function update(Model $model)
     {
+        $model->clean();
         if ($this->isView) {
             $this->updateThroughView($model);
         } else {
@@ -116,6 +117,7 @@ abstract class TableAccessLayer
 
     public function create(Model $model)
     {
+        $model->clean();
         if ($this->isView) {
             $pk = $this->createThroughView($model);
         } else {
