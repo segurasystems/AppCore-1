@@ -16,6 +16,10 @@ abstract class CrudController extends Controller
 
     public function getAllRequest(Request $request, Response $response): Response
     {
+        if($request->hasHeader("fields")){
+            return $this->getFieldsRequest($request,$response);
+        }
+
         $service = $this->getService();
         $filter = $this->parseFilters($request);
         // TODO
