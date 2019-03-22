@@ -285,7 +285,7 @@ abstract class TableAccessLayer
     {
         $select = $this->getSQL()->select();
         $select->columns(['count' => new Expression('IFNULL(COUNT(*),0)')]);
-        $this->applyFilterToSelect($select);
+        $this->applyFilterToSelect($select,$filter);
         $row = $this->getSQL()
             ->prepareStatementForSqlObject($select)
             ->execute()
