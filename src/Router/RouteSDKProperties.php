@@ -145,7 +145,7 @@ class RouteSDKProperties implements \JsonSerializable
     public function addArgument(string $name, array $argument)
     {
         $argument["name"] = $name;
-        if($argument["required"]){
+        if($argument["required"] ?? false){
             $argument["cancelHydrate"] = false;
         }
         $this->arguments[$name] = [
