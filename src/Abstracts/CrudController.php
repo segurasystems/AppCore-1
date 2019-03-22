@@ -19,7 +19,7 @@ abstract class CrudController extends Controller
         if($request->hasHeader("fields")){
             return $this->getFieldsRequest($request,$response);
         }
-        if($response->hasHeader("count")){
+        if($request->hasHeader("count")){
             return $this->getCountRequest($request,$response);
         }
 
