@@ -19,6 +19,9 @@ abstract class CrudController extends Controller
         if($request->hasHeader("fields")){
             return $this->getFieldsRequest($request,$response);
         }
+        if($response->hasHeader("count")){
+            return $this->getCountRequest($request,$response);
+        }
 
         $service = $this->getService();
         $filter = $this->parseFilters($request);
@@ -139,6 +142,22 @@ abstract class CrudController extends Controller
         return $this->jsonSuccessResponse(
             [
                 'Action'          => 'LIST_FIELDS',
+                $this->pluralTerm => $result,
+            ],
+            $request,
+            $response
+        );
+    }
+
+    public function getCountRequest(Request $request, Response $response): Response
+    {
+        $filter = $this->parseFilters($request);
+
+        $result = $this->getService()->count($filter);
+
+        return $this->jsonSuccessResponse(
+            [
+                'Action'          => 'COUNT',
                 $this->pluralTerm => $result,
             ],
             $request,
