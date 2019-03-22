@@ -228,11 +228,8 @@ abstract class TableAccessLayer
     public function get(Filter $filter)
     {
         $filter->setLimit(1);
-        $filtered = $this->getAllFilter($filter);
-        if (count($filtered) > 0) {
-            return $filtered[0];
-        }
-        return null;
+        $filtered = $this->getAll($filter);
+        return $filtered[0] ?? null;
     }
 
     /**
