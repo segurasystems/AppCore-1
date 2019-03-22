@@ -145,6 +145,9 @@ class RouteSDKProperties implements \JsonSerializable
     public function addArgument(string $name, array $argument)
     {
         $argument["name"] = $name;
+        if($argument["required"]){
+            $argument["cancelHydrate"] = false;
+        }
         $this->arguments[$name] = [
             "in" => $argument["in"] ?? "path",
             "description" => $argument["description"] ?? null,
@@ -152,6 +155,7 @@ class RouteSDKProperties implements \JsonSerializable
             "default" => $argument["default"] ?? null,
             "type" => $argument["type"] ?? null,
             "examples" => $argument["examples"] ?? [],
+            "cancelHydrate" => $argument["cancelHydrate"] ?? false,
         ];
         return $this;
     }
