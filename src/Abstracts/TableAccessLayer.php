@@ -396,7 +396,7 @@ abstract class TableAccessLayer
     private function applyJoinToSelect(Select $select, Join $join)
     {
         $table = $join->getJoin()[0];
-        $alias = "";
+        $alias = $table;
         if(!empty($join->getAlias())){
             $alias = $join->getAlias();
             $table = [$alias=>$table];
@@ -433,11 +433,12 @@ abstract class TableAccessLayer
      */
     private function createPredicateFromCondition(Condition $condition)
     {
-        $table = "";
         if($condition->getTable()){
-            $table = "{$condition->getTable()}.";
+            $table = "{$condition->getTable()}";
+        } else {
+            $table = $this->table;
         }
-        $field = "{$table}{$condition->getColumn()}";
+        $field = "{$table}.{$condition->getColumn()}";
         switch ($condition->getComparator()) {
             case Condition::IN:
                 return new In($field,$condition->getValue());

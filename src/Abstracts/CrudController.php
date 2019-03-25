@@ -124,17 +124,15 @@ abstract class CrudController extends Controller
         $filter = $this->parseQueryHeader($request);
         $fields = $request->getHeader("Fields")[0] ?? "[]";
         $fields = json_decode($fields, true) ?? [];
-        $types = $request->getHeader("Types")[0] ?? "[]";
-        $types = json_decode($types, true) ?? [];
 
         $count = count($fields);
 
         if ($count > 1) {
-            $result = $this->getService()->getAllFields($fields, $filter, $types);
+            $result = $this->getService()->getAllFields($fields, $filter);
         } else {
             if ($count === 1) {
                 $field = $fields[0];
-                $result = $this->getService()->getAllField($field, $filter, $types[$field] ?? null);
+                $result = $this->getService()->getAllField($field, $filter);
             } else {
                 $result = [];
             }
