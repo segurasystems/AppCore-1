@@ -24,7 +24,7 @@ abstract class CrudController extends Controller
         }
 
         $service = $this->getService();
-        $filter = $this->parseFilters($request);
+        $filter = $this->parseQueryHeader($request);
         // TODO
         //$this->responder->successResponse($action,$data,$request,$response);
 
@@ -121,7 +121,7 @@ abstract class CrudController extends Controller
 
     public function getFieldsRequest(Request $request, Response $response): Response
     {
-        $filter = $this->parseFilters($request);
+        $filter = $this->parseQueryHeader($request);
         $fields = $request->getHeader("Fields")[0] ?? "[]";
         $fields = json_decode($fields, true) ?? [];
         $types = $request->getHeader("Types")[0] ?? "[]";
@@ -151,7 +151,7 @@ abstract class CrudController extends Controller
 
     public function getCountRequest(Request $request, Response $response): Response
     {
-        $filter = $this->parseFilters($request);
+        $filter = $this->parseQueryHeader($request);
 
         $result = $this->getService()->count($filter);
 

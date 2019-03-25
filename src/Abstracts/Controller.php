@@ -4,6 +4,7 @@ namespace Gone\AppCore\Abstracts;
 use Gone\AppCore\Controllers\InlineCssTrait;
 use Gone\SDK\Common\Exceptions\FilterDecodeException;
 use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\QueryBuilder\Query;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -96,25 +97,24 @@ abstract class Controller
     }
 
     /**
-     * Decide if a request has a filter attached to it.
+     * Decide if a request has a json header attached to it.
      *
      * @param Request  $request
-     * @param Response $response
      *
      * @throws FilterDecodeException
      *
      * @return bool
      */
-    protected function requestHasFilters(Request $request) : bool
+    protected function requestHasJsonHeader(Request $request, string $header) : bool
     {
-        if ($request->hasHeader("Filter")) {
-            $filterText = trim($request->getHeader('Filter')[0]);
-            if (!empty($filterText)) {
-                $decode = json_decode($filterText,true);
-                if ($decode !== null || $filterText === "null") {
+        if ($request->hasHeader($header)) {
+            $headerText = trim($request->getHeader($header)[0]);
+            if (!empty($headerText)) {
+                $decode = json_decode($headerText,true);
+                if ($decode !== null || $headerText === "null") {
                     return true;
                 }
-                throw new FilterDecodeException("Could not decode given Filter. Reason: Not JSON. Given: \"" . $filterText . "\"");
+                throw new FilterDecodeException("Could not decode given {$header}. Reason: Not JSON. Given: \"" . $headerText . "\"");
             }
         }
         return false;
@@ -129,9 +129,17 @@ abstract class Controller
      */
     protected function parseFilters(Request $request) : Filter
     {
-        if($this->requestHasFilters($request)) {
+        if($this->requestHasJsonHeader($request,"Filter")) {
             return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
         }
         return Filter::Factory();
+    }
+
+    protected function parseQueryHeader(Request $request) : Query
+    {
+        if($this->requestHasJsonHeader($request,"Query")){
+            return Query::CreateFromJSON($request->getHeader('Query')[0]);
+        }
+        return Query::Factory();
     }
 }

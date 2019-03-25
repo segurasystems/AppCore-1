@@ -3,7 +3,8 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use Gone\SDK\Common\Filters\Filter;
+//use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\QueryBuilder\Query;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
@@ -70,44 +71,44 @@ abstract class Service
     }
 
     /**
-     * @param Filter $filter
+     * @param Query $filter
      *
      * @return AbstractModel|null
      */
-    public function get(Filter $filter)
+    public function get(Query $filter)
     {
         return $this->getAccessLayer()
             ->get($filter);
     }
 
     /**
-     * @param Filter $filter
+     * @param Query $filter
      *
      * @return AbstractModel[]
      */
-    public function getAll(Filter $filter): array
+    public function getAll(Query $filter): array
     {
         return $this->getAccessLayer()
             ->getAll($filter);
     }
 
     /**
-     * @param Filter $filter
+     * @param Query $filter
      *
      * @return int
      */
-    public function count(Filter $filter = null): int
+    public function count(Query $filter = null): int
     {
         return $this->getAccessLayer()
             ->count($filter);
     }
 
-    public function getAllField(string $field, Filter $filter = null, string $type = null)
+    public function getAllField(string $field, Query $filter = null, string $type = null)
     {
         return $this->getAccessLayer()->getAllField($field, $filter, $type);
     }
 
-    public function getAllFields(array $fields, Filter $filter = null, array $types = [])
+    public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
         return $this->getAccessLayer()->getAllFields($fields, $filter, $types);
     }
