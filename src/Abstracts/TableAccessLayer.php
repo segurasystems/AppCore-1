@@ -11,10 +11,23 @@ namespace Gone\AppCore\Abstracts;
 use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\Filters\FilterCondition;
+use Gone\SDK\Common\QueryBuilder\Condition;
+use Gone\SDK\Common\QueryBuilder\ConditionGroup;
+use Gone\SDK\Common\QueryBuilder\Join;
+use Gone\SDK\Common\QueryBuilder\Query;
+use mysql_xdevapi\Exception;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
+use Zend\Db\Sql\Predicate\Between;
+use Zend\Db\Sql\Predicate\In;
+use Zend\Db\Sql\Predicate\Like;
+use Zend\Db\Sql\Predicate\NotBetween;
+use Zend\Db\Sql\Predicate\NotIn;
+use Zend\Db\Sql\Predicate\NotLike;
+use Zend\Db\Sql\Predicate\Operator;
 use Zend\Db\Sql\Predicate\PredicateInterface;
+use Zend\Db\Sql\Predicate\PredicateSet;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Where;
 use \Zend\Db\TableGateway\TableGateway as TableGateway;
@@ -221,35 +234,35 @@ abstract class TableAccessLayer
     }
 
     /**
-     * @param Filter $filter
+     * @param Query $filter
      *
      * @return AbstractModel|null
      */
-    public function get(Filter $filter)
+    public function get(Query $filter)
     {
-        $filter->setLimit(1);
+        $filter->limit(1);
         $filtered = $this->getAll($filter);
         return $filtered[0] ?? null;
     }
 
     /**
-     * @param Filter|null $filter
+     * @param Query|null $filter
      *
      * @return AbstractModel[]
      */
-    public function getAll(Filter $filter = null)
+    public function getAll(Query $filter = null)
     {
         $select = $this->getSql()->select();
         $this->applyFilterToSelect($select, $filter);
         return $this->getWithSelect($select);
     }
 
-    public function getAllField(string $field, Filter $filter = null, string $type = null)
+    public function getAllField(string $field, Query $filter = null, string $type = null)
     {
         return array_column($this->getAllFields([$field], $filter, [$field => $type]), $field);
     }
 
-    public function getAllFields(array $fields, Filter $filter = null, array $types = [])
+    public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
         $select = $this->getSQL()->select();
         $this->applyFilterToSelect($select, $filter);
@@ -277,16 +290,16 @@ abstract class TableAccessLayer
     }
 
     /**
-     * @param Filter|null $filter
+     * @param Query|null $filter
      *
      * @return int
      */
-    public function count(Filter $filter = null)
+    public function count(Query $filter = null)
     {
         $select = $this->getSQL()->select();
         $select->columns(['count' => new Expression('IFNULL(COUNT(*),0)')]);
-        $filter->setLimit(0)->setOffset(0)->setOrder(null);
-        $this->applyFilterToSelect($select,$filter);
+        $filter->limit(0)->offset(0)->setOrder([]);
+        $this->applyFilterToSelect($select, $filter);
         $row = $this->getSQL()
             ->prepareStatementForSqlObject($select)
             ->execute()
@@ -322,7 +335,7 @@ abstract class TableAccessLayer
         return $results;
     }
 
-    private function applyFilterToSelect(Select $select, Filter $filter = null)
+    private function applyFilterToSelect(Select $select, Query $filter = null)
     {
         if ($filter) {
             $this->applyFilterLimitToSelect($select, $filter);
@@ -333,7 +346,7 @@ abstract class TableAccessLayer
         }
     }
 
-    private function applyFilterLimitToSelect(Select $select, Filter $filter)
+    private function applyFilterLimitToSelect(Select $select, Query $filter)
     {
         if ($filter->getLimit()) {
             $select->limit($filter->getLimit());
@@ -343,28 +356,35 @@ abstract class TableAccessLayer
         }
     }
 
-    private function applyFilterOrderToSelect(Select $select, Filter $filter)
+    private function applyFilterOrderToSelect(Select $select, Query $filter)
     {
-        if ($filter->getOrder() !== null) {
-            $select->order("{$filter->getOrder()} {$filter->getOrderDirection()}");
+        if (!empty($filter->getOrder())) {
+            $orders = [];
+            foreach ($filter->getOrder() as $field => $direction) {
+                $orders[] = "{$field} {$direction}";
+            }
+            if (!empty($orders)) {
+                $select->order(implode(", ", $orders));
+            }
         }
     }
 
-    private function applyFilterWhereToSelect(Select $select, Filter $filter)
+    private function applyFilterWhereToSelect(Select $select, Query $filter)
     {
-        foreach ($filter->getWheres() as $where) {
-            $this->applyWhereToSelect($select, $where);
+        $condition = $filter->getCondition();
+        if ($condition instanceof ConditionGroup) {
+            $this->applyFilterConditionGroupToSelect($select, $condition);
         }
     }
 
-    private function applyFilterJoinsToSelect(Select $select, Filter $filter)
+    private function applyFilterJoinsToSelect(Select $select, Query $filter)
     {
         foreach ($filter->getJoins() as $join) {
             $this->applyJoinToSelect($select, $join);
         }
     }
 
-    private function applyFilterDistinctToSelect(Select $select, Filter $filter)
+    private function applyFilterDistinctToSelect(Select $select, Query $filter)
     {
 //        TODO : Add distinct to Filter
 //        if($filter->getDistinct()){
@@ -373,64 +393,74 @@ abstract class TableAccessLayer
 //        }
     }
 
-    private function applyJoinToSelect(Select $select, $join)
+    private function applyJoinToSelect(Select $select, Join $join)
     {
-        $select->join(
-            $join["tableFrom"],
-            "{$join["tableFrom"]}.{$join["fieldFrom"]} = {$join["tableTo"]}.{$join["fieldTo"]}",
-            $join["columns"],
-            $join["type"]);
+        $table = $join->getJoin()[0];
+        $alias = "";
+        if(!empty($join->getAlias())){
+            $alias = $join->getAlias();
+            $table = [$alias=>$table];
+            $alias .= ".";
+        }
+        $select->join($table,"{$alias}{$join->getJoin()[1]} = {$join->getTo()[0]}.{$join->getTo()[1]}",[],$join->getType() ?? Select::JOIN_INNER);
     }
 
-    private function applyWhereToSelect(Select $select, $condition)
+    private function applyFilterConditionGroupToSelect(Select $select, ConditionGroup $condition)
     {
-        if (
-            $condition instanceof \Closure
-            || $condition instanceof Where
-            || $condition instanceof PredicateInterface
-        ) {
-            $select->where($condition);
-        } else {
-            $spec = function (Where $where) use ($condition) {
-                $column = (empty($condition["table"]) ? '' : "{$condition["table"]}.") . $condition["column"];
-                switch ($condition['condition']) {
-                    case FilterCondition::CONDITION_EQUAL:
-                        $where->equalTo($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_NOT_EQUAL:
-                        $where->notEqualTo($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_GREATER_THAN:
-                        $where->greaterThan($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_GREATER_THAN_OR_EQUAL:
-                        $where->greaterThanOrEqualTo($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_LESS_THAN:
-                        $where->lessThan($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_LESS_THAN_OR_EQUAL:
-                        $where->lessThanOrEqualTo($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_LIKE:
-                        $where->like($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_NOT_LIKE:
-                        $where->notLike($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_IN:
-                        $where->in($column, $condition['value']);
-                        break;
-                    case FilterCondition::CONDITION_NOT_IN:
-                        $where->notIn($column, $condition['value']);
-                        break;
+        $select->where($this->createPredicateFromConditionGroup($condition));
+    }
 
-                    default:
-                        // @todo better exception plz.
-                        throw new \Exception("Cannot work out what conditional '{$condition['condition']}' is supposed to do in Zend... Probably unimplemented?");
+    private function createPredicateFromConditionGroup(ConditionGroup $condition)
+    {
+        $predicates = [];
+        foreach ($condition->getConditions() as $condition) {
+            if ($condition instanceof ConditionGroup) {
+                $predicates[] = $this->createPredicateFromConditionGroup($condition);
+            } else {
+                if ($condition instanceof Condition) {
+                    $predicates[] = $this->createPredicateFromCondition($condition);
                 }
-            };
-            $select->where($spec);
+            }
+        }
+        return new PredicateSet($predicates, $condition->getComparator());
+    }
+
+    /**
+     * @param Condition $condition
+     *
+     * @return PredicateInterface
+     * @throws \Exception
+     */
+    private function createPredicateFromCondition(Condition $condition)
+    {
+        $table = "";
+        if($condition->getTable()){
+            $table = "{$condition->getTable()}.";
+        }
+        $field = "{$table}{$condition->getColumn()}";
+        switch ($condition->getComparator()) {
+            case Condition::IN:
+                return new In($field,$condition->getValue());
+            case Condition::NOT_IN:
+                return new NotIn($field,$condition->getValue());
+            case Condition::LIKE:
+                return new Like($field,$condition->getValue());
+            case Condition::NOT_LIKE:
+                return new NotLike($field,$condition->getValue());
+            case Condition::BETWEEN:
+                return new Between($field,$condition->getValue()["min"],$condition->getValue()["max"]);
+            case Condition::NOT_BETWEEN:
+                return new NotBetween($field,$condition->getValue()["min"],$condition->getValue()["max"]);
+            case Condition::LESS_THAN:
+            case Condition::LESS_THAN_OR_EQUAL:
+            case Condition::GREATER_THAN:
+            case Condition::GREATER_THAN_OR_EQUAL:
+            case Condition::EQUAL:
+            case Condition::NOT_EQUAL:
+                return new Operator($field,$condition->getComparator(),$condition->getValue());
+            default:
+                throw new \Exception("Unable to map comparator for condition to predicate");
+                break;
         }
     }
 }
