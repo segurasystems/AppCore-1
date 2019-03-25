@@ -130,7 +130,7 @@ abstract class Controller
     protected function parseFilters(Request $request) : Filter
     {
         if($this->requestHasJsonHeader($request,"Filter")) {
-            return Filter::Factory()->parseFromHeader($request->getHeader('Filter')[0]);
+            return Filter::CreateFromJSON($request->getHeader('Filter')[0]);
         }
         return Filter::Factory();
     }
