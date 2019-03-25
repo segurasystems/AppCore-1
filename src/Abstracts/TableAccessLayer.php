@@ -400,9 +400,8 @@ abstract class TableAccessLayer
         if(!empty($join->getAlias())){
             $alias = $join->getAlias();
             $table = [$alias=>$table];
-            $alias .= ".";
         }
-        $select->join($table,"{$alias}{$join->getJoin()[1]} = {$join->getTo()[0]}.{$join->getTo()[1]}",[],$join->getType() ?? Select::JOIN_INNER);
+        $select->join($table,"{$alias}.{$join->getJoin()[1]} = {$join->getTo()[0]}.{$join->getTo()[1]}",[],$join->getType() ?? Select::JOIN_INNER);
     }
 
     private function applyFilterConditionGroupToSelect(Select $select, ConditionGroup $condition)
