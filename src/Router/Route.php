@@ -36,6 +36,8 @@ class Route
     protected $sdkClass;
     protected $sdkFunction;
 
+    protected $sdkProperties = null;
+
     public static function Factory(): Route
     {
         return new Route();
@@ -267,5 +269,13 @@ class Route
         return $this->sdkFunction;
     }
 
+    public function setSdkProperties (RouteSDKProperties $properties){
+        $this->sdkProperties = $properties->__toArray();
+        return $this;
+    }
+
+    public function getSdkProperties(){
+        return $this->sdkProperties;
+    }
 
 }
