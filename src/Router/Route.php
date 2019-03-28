@@ -33,7 +33,8 @@ class Route
     protected $access = self::ACCESS_PUBLIC;
     protected $arguments = [];
 
-    protected $sdkProperties;
+    protected $sdkClass;
+    protected $sdkFunction;
 
     public static function Factory(): Route
     {
@@ -252,22 +253,18 @@ class Route
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getSdkProperties(): ?array
-    {
-        return $this->sdkProperties;
+    public function setSDKRef(string $class, string $function){
+        $this->sdkClass = $class;
+        $this->sdkFunction = $function;
+        return $this;
     }
 
-    /**
-     * @param mixed $sdkProperties
-     * @return Route
-     */
-    public function setSdkProperties(RouteSDKProperties $sdkProperties)
-    {
-        $this->sdkProperties = $sdkProperties->__toArray();
-        return $this;
+    public function getSDKClass(){
+        return $this->sdkClass;
+    }
+
+    public function getSDKFunction(){
+        return $this->sdkFunction;
     }
 
 

@@ -16,6 +16,7 @@ class ApiListController extends Controller
             $json           = [];
             $json['Status'] = "Okay";
             $models = [];
+            $propertyArray = $this->loadPropertyArray();
             foreach (Router::Instance()->getRoutes() as $route) {
                 $routeArray = [
                     'name'               => $route->getName(),
@@ -38,7 +39,9 @@ class ApiListController extends Controller
 //                    'tableName'          => $route->getSDKTableName(),
 //                    'responseKey'        => $route->getSDKResponseKey(),
                 ];
-                $sdkProperties = $route->getSdkProperties() ?? [];
+                $sdkClass = $route->getSDKClass();
+                $sdkFunction = $route->getSDKFunction();
+                $sdkProperties = $propertyArray[$sdkClass][$sdkFunction] ?? [];
                 if (!empty($sdkProperties["responseClass"])) {
                     $class = $sdkProperties["responseClass"];
                     $className = $class::NAME_SINGULAR;
@@ -91,7 +94,6 @@ class ApiListController extends Controller
                     'methods'  => $route->getHttpMethod(),
                     'callable' => $callable,
                     'access'   => $route->getAccess(),
-                    'properties'=> $route->getSdkProperties(),
                 ];
             }
         }
@@ -108,5 +110,20 @@ class ApiListController extends Controller
                 __DIR__ . "/../../assets/css/api-list.css",
             ])
         ]);
+    }
+
+    private function loadPropertyArray(){
+        $dir = APP_ROOT . "/src/Routes/SDKData";
+        $props = [];
+        if(file_exists($dir)){
+            foreach (new \DirectoryIterator($dir) as $file) {
+                if (!$file->isDot()) {
+                    if ($file->isFile() && $file->getExtension() == 'php') {
+                        $props = array_merge_($props,include $file->getRealPath() . "");
+                    }
+                }
+            }
+        }
+        return $props;
     }
 }
