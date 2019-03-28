@@ -84,10 +84,7 @@ class EnvironmentHeadersOnResponse
                 }
             }
 
-            if (($request->hasHeader('Content-type') && stripos($request->getHeader('Content-type')[0], 'application/json') !== false)
-                || ($request->hasHeader('Accept') && stripos($request->getHeader('Accept')[0], 'application/json') !== false)
-                || $this->apiExplorerEnabled === false
-            ) {
+            if ($request->hasHeader('Accept') || $this->apiExplorerEnabled === false) {
                 $response = $response->withJson($json, null, JSON_PRETTY_PRINT);
             } else {
                 /** @var Twig $twig */
