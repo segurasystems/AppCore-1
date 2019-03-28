@@ -27,9 +27,12 @@ class ApiListController extends Controller
                     'access'   => $route->getAccess(),
                     'example'  => $route->getExampleEntity() ? $route->getExampleEntity()->__toArray() : null,
                 ];
-                $sdkClass = $route->getSDKClass();
-                $sdkFunction = $route->getSDKFunction();
-                $sdkProperties = $propertyArray[$sdkClass][$sdkFunction] ?? [];
+                $sdkProperties = $route->getSdkProperties();
+                if(empty($sdkProperties)) {
+                    $sdkClass = $route->getSDKClass();
+                    $sdkFunction = $route->getSDKFunction();
+                    $sdkProperties = $propertyArray[$sdkClass][$sdkFunction] ?? [];
+                }
                 if (!empty($sdkProperties["responseClass"])) {
                     $class = $sdkProperties["responseClass"];
                     $className = $class::NAME_SINGULAR;
