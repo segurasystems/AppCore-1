@@ -119,7 +119,9 @@ class ApiListController extends Controller
             foreach (new \DirectoryIterator($dir) as $file) {
                 if (!$file->isDot()) {
                     if ($file->isFile() && $file->getExtension() == 'php') {
-                        $props = array_merge_($props,include $file->getRealPath() . "");
+                        $props = array_merge($props,include $file->getRealPath() . "");
+                    } elseif ($file->isDir()) {
+                        $props = array_merge($props,$this->loadPropertyArray($file->getRealPath()));
                     }
                 }
             }
