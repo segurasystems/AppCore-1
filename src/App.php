@@ -93,12 +93,17 @@ class App
         }
 
         // Create Slim app
+        $cacheFile = APP_NAME;
+        if(DEBUG_ENABLED){
+            $cacheFile .= "." . date("Y-m-d-H-i");
+        }
         $this->app = new \Slim\App(
             new Container([
                 'settings' => [
                     'debug'                             => true,
                     'displayErrorDetails'               => true,
                     'determineRouteBeforeAppMiddleware' => true,
+                    'routerCacheFile' => "/tmp/{$cacheFile}.routes.cache.php",
                 ]
             ])
         );
