@@ -337,6 +337,9 @@ abstract class TableAccessLayer
 
     private function applyFilterToSelect(Select $select, Query $filter = null)
     {
+        if($filter === null){
+            $filter = Query::Factory();
+        }
         if ($filter) {
             $this->applyFilterLimitToSelect($select, $filter);
             $this->applyFilterOrderToSelect($select, $filter);

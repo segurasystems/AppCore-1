@@ -86,7 +86,7 @@ abstract class Service
      *
      * @return AbstractModel[]
      */
-    public function getAll(Query $filter): array
+    public function getAll(Query $filter = null): array
     {
         return $this->getAccessLayer()
             ->getAll($filter);
