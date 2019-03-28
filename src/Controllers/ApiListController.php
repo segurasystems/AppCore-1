@@ -1,4 +1,5 @@
 <?php
+
 namespace Gone\AppCore\Controllers;
 
 use Gone\AppCore\Abstracts\Controller;
@@ -13,31 +14,18 @@ class ApiListController extends Controller
     public function listAllRoutes(Request $request, Response $response, $args)
     {
         if ($request->getContentType() == "application/json" || $request->getHeader("Accept")[0] == "application/json") {
-            $json           = [];
+            $json = [];
             $json['Status'] = "Okay";
             $models = [];
-            $propertyArray = $this->loadPropertyArray();
+            $propertyArray = $this->loadPropertyArray(APP_ROOT . "/src/Routes/SDKData");
             foreach (Router::Instance()->getRoutes() as $route) {
                 $routeArray = [
-                    'name'               => $route->getName(),
-//                    'class'              => $route->getSDKClass(),
-//                    'function'           => $route->getSDKFunction(),
-//                    'template'           => $route->getSDKTemplate(),
-                    'endpoint'           => $route->getHttpEndpoint(),
-                    'pattern'            => $route->getRouterPattern(),
-                    'method'             => $route->getHttpMethod(),
-//                    'singular'           => $route->getSingular(),
-//                    'plural'             => $route->getPlural(),
-//                    'properties'         => $route->getProperties(),
-//                    'propertiesOptions'  => $route->getPropertyOptions(),
-//                    'propertyData'       => $route->getPropertyData(),
-                    'access'             => $route->getAccess(),
-                    'example'            => $route->getExampleEntity() ? $route->getExampleEntity()->__toArray() : null,
-//                    'callbackProperties' => $route->getCallbackProperties(),
-//                    'modelSafeMethod'    => $route->getSDKModelSafe(),
-//                    'hydratable'         => $route->getSDKHydrate(),
-//                    'tableName'          => $route->getSDKTableName(),
-//                    'responseKey'        => $route->getSDKResponseKey(),
+                    'name'     => $route->getName(),
+                    'endpoint' => $route->getHttpEndpoint(),
+                    'pattern'  => $route->getRouterPattern(),
+                    'method'   => $route->getHttpMethod(),
+                    'access'   => $route->getAccess(),
+                    'example'  => $route->getExampleEntity() ? $route->getExampleEntity()->__toArray() : null,
                 ];
                 $sdkClass = $route->getSDKClass();
                 $sdkFunction = $route->getSDKFunction();
@@ -51,11 +39,11 @@ class ApiListController extends Controller
                     $models[$className]["properties"] = $class::getPublicPropertyMeta();
                     $models[$className]["primaryKeys"] = $class::getPublicPrimaryKeyFields();
                     $sdkProperties["responseClass"] = $className;
-                    if(empty($sdkProperties["responseKey"])){
+                    if (empty($sdkProperties["responseKey"])) {
                         $sdkProperties["responseKey"] = $sdkProperties["returnsArray"] ? $class::NAME_PLURAL : $class::NAME_SINGULAR;
                     }
                 }
-                $routeArray = array_merge($routeArray,$sdkProperties);
+                $routeArray = array_merge($routeArray, $sdkProperties);
 
                 $json['Routes'][] = array_filter($routeArray);
             }
@@ -69,10 +57,10 @@ class ApiListController extends Controller
 
         foreach (Router::Instance()->getRoutes() as $route) {
             if (json_decode($route->getName()) !== null) {
-                $routeJson            = json_decode($route->getName(), true);
+                $routeJson = json_decode($route->getName(), true);
                 $routeJson['pattern'] = $route->getPattern();
                 $routeJson['methods'] = $route->getMethods();
-                $displayRoutes[]      = $routeJson;
+                $displayRoutes[] = $routeJson;
             } else {
                 $callable = $route->getCallback();
 
@@ -112,16 +100,16 @@ class ApiListController extends Controller
         ]);
     }
 
-    private function loadPropertyArray(){
-        $dir = APP_ROOT . "/src/Routes/SDKData";
+    private function loadPropertyArray($dir)
+    {
         $props = [];
-        if(file_exists($dir)){
+        if (file_exists($dir)) {
             foreach (new \DirectoryIterator($dir) as $file) {
                 if (!$file->isDot()) {
                     if ($file->isFile() && $file->getExtension() == 'php') {
-                        $props = array_merge($props,include $file->getRealPath() . "");
+                        $props = array_merge($props, include $file->getRealPath() . "");
                     } elseif ($file->isDir()) {
-                        $props = array_merge($props,$this->loadPropertyArray($file->getRealPath()));
+                        $props = array_merge($props, $this->loadPropertyArray($file->getRealPath()));
                     }
                 }
             }
