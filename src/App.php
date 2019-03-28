@@ -457,7 +457,7 @@ class App
                     if ($file->isFile() && $file->getExtension() == 'php') {
                         $this->addRoutePath($file->getRealPath());
                         $count++;
-                    } elseif ($file->isDir()) {
+                    } elseif ($file->isDir() && strpos(strtolower($file->getFilename()),"sdkdata") === false) {
                         $count += $this->addRoutePathsRecursively($file->getRealPath());
                     }
                 }
