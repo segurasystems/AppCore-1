@@ -412,10 +412,10 @@ abstract class TableAccessLayer
         $select->where($this->createPredicateFromConditionGroup($condition));
     }
 
-    private function createPredicateFromConditionGroup(ConditionGroup $condition)
+    private function createPredicateFromConditionGroup(ConditionGroup $conditionGroup)
     {
         $predicates = [];
-        foreach ($condition->getConditions() as $condition) {
+        foreach ($conditionGroup->getConditions() as $condition) {
             if ($condition instanceof ConditionGroup) {
                 $predicates[] = $this->createPredicateFromConditionGroup($condition);
             } else {
@@ -424,7 +424,7 @@ abstract class TableAccessLayer
                 }
             }
         }
-        return new PredicateSet($predicates, $condition->getComparator());
+        return new PredicateSet($predicates, $conditionGroup->getComparator());
     }
 
     /**
