@@ -48,7 +48,7 @@ class ApiListController extends Controller
                 }
                 $routeArray = array_merge($routeArray, $sdkProperties);
 
-                $json['Routes'][] = array_filter($routeArray);
+                $json['Routes'][] = array_filter($routeArray,function($item){return $item !== null;});
             }
             $json["Models"] = $models;
             return $this->jsonResponse($json, $request, $response);
