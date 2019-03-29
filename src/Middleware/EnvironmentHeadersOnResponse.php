@@ -74,7 +74,7 @@ class EnvironmentHeadersOnResponse
                             "Requests" => [],
                             "Time"     => []
                         ],
-                    'DI' => Container::getProfile(),
+                    'DI' => asort(Container::getProfile()),
                 ]);
             }
 
