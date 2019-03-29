@@ -13,7 +13,7 @@ class RouteSDKProperties implements \JsonSerializable
 {
     protected $class;
     protected $function;
-    protected $hydratable = false;
+    protected $hydratable = true;
     protected $responseKey;
     protected $returnsArray = false;
     protected $responseClass;
