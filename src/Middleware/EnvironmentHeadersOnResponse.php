@@ -83,27 +83,20 @@ class EnvironmentHeadersOnResponse
                     $response = $response->withStatus(200);
                 }
             }
+            $response = $response->withJson($json, null, JSON_PRETTY_PRINT);
 
-            if (($request->hasHeader('Content-type') && stripos($request->getHeader('Content-type')[0], 'application/json') !== false)
-                || ($request->hasHeader('Accept') && stripos($request->getHeader('Accept')[0], 'application/json') !== false)
-                || $this->apiExplorerEnabled === false
-            ) {
-                $response = $response->withJson($json, null, JSON_PRETTY_PRINT);
-            } else {
-                /** @var Twig $twig */
-                $twig = App::Container()->get("view");
-                $response->getBody()->rewind();
-                $response = $twig->render($response, 'api/explorer.html.twig', [
-                    'page_name'                => "API Explorer",
-                    'json'                     => $json,
-                    'json_pretty_printed_rows' => explode("\n", json_encode($json, JSON_PRETTY_PRINT)),
-                    'inline_css'               => $this->renderInlineCss([
-                        __DIR__ . "/../../assets/css/reset.css",
-                        __DIR__ . "/../../assets/css/api-explorer.css"
-                    ])
-                ]);
-                $response = $response->withHeader("Content-type", "text/html");
-            }
+//            $twig = App::Container()->get("view");
+//            $response->getBody()->rewind();
+//            $response = $twig->render($response, 'api/explorer.html.twig', [
+//                'page_name'                => "API Explorer",
+//                'json'                     => $json,
+//                'json_pretty_printed_rows' => explode("\n", json_encode($json, JSON_PRETTY_PRINT)),
+//                'inline_css'               => $this->renderInlineCss([
+//                    __DIR__ . "/../../assets/css/reset.css",
+//                    __DIR__ . "/../../assets/css/api-explorer.css"
+//                ])
+//            ]);
+//            $response = $response->withHeader("Content-type", "text/html");
         }
 
         return $response;
