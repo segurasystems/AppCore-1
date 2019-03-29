@@ -3,6 +3,7 @@
 namespace Gone\AppCore\Middleware;
 
 use Gone\AppCore\App;
+use Gone\AppCore\Container;
 use Gone\AppCore\Controllers\InlineCssTrait;
 use Gone\AppCore\Zend\Profiler;
 use Slim\Http\Request;
@@ -73,6 +74,7 @@ class EnvironmentHeadersOnResponse
                             "Requests" => [],
                             "Time"     => []
                         ],
+                    'DI' => Container::getProfile(),
                 ]);
             }
 

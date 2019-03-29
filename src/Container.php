@@ -9,6 +9,7 @@ use Slim\Exception\ContainerValueNotFoundException;
 
 class Container extends \Slim\Container
 {
+    private static $profile = [];
     private $seenList = [];
 
     private $maxDepth = 32;
@@ -16,6 +17,10 @@ class Container extends \Slim\Container
     public function __construct(array $values = [])
     {
         parent::__construct($values);
+    }
+
+    public static function getProfile(){
+        return self::$profile;
     }
 
     /**
@@ -30,6 +35,7 @@ class Container extends \Slim\Container
      */
     public function get($id)
     {
+        $start = microtime(true);
         if (!$this->offsetExists($id) && class_exists($id)) {
             $reflection = new \ReflectionClass($id);
             $params     = [];
@@ -47,21 +53,22 @@ class Container extends \Slim\Container
                 }
             }
             $entity = $reflection->newInstanceArgs($params);
-
-            return $entity;
-        }
-        try {
-            return $this->offsetGet($id);
-        } catch (\InvalidArgumentException $exception) {
-            if ($this->exceptionThrownByContainer($exception)) {
-                throw new SlimContainerException(
-                    sprintf('Container error while retrieving "%s"', $id),
-                    null,
-                    $exception
-                );
+        }else {
+            try {
+                $entity = $this->offsetGet($id);
+            } catch (\InvalidArgumentException $exception) {
+                if ($this->exceptionThrownByContainer($exception)) {
+                    throw new SlimContainerException(
+                        sprintf('Container error while retrieving "%s"', $id),
+                        null,
+                        $exception
+                    );
+                }
+                throw $exception;
             }
-            throw $exception;
         }
+        self::$profile[$id] = microtime(true) - $start;
+        return $entity;
     }
 
     public function has($id)

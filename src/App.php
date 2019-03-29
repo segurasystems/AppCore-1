@@ -3,6 +3,7 @@ namespace Gone\AppCore;
 
 use function Clue\StreamFilter\fun;
 use DebugBar\Bridge\MonologCollector;
+use DebugBar\Bridge\SlimCollector;
 use DebugBar\DebugBar;
 use DebugBar\StandardDebugBar;
 use Faker\Factory as FakerFactory;
@@ -319,9 +320,11 @@ class App
             return $monolog;
         };
 
-        $this->container[DebugBar::class] = function (Slim\Container $container) {
+        $_app = $this->getApp();
+        $this->container[DebugBar::class] = function (Slim\Container $container) use ($_app) {
             $debugBar = new StandardDebugBar();
             $debugBar->addCollector(new MonologCollector($container->get(\Monolog\Logger::class)));
+            $debugBar->addCollector(new SlimCollector($_app));
             return $debugBar;
         };
 
