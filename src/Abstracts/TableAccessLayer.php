@@ -266,7 +266,7 @@ abstract class TableAccessLayer
     {
         $select = $this->getSQL()->select();
         $this->applyFilterToSelect($select, $filter);
-        $select->columns($fields);
+        $select->columns($fields,false);
         return array_map(function ($item) use ($types) {
             foreach ($types as $field => $type) {
                 if (isset($item[$field]) && $type) {
