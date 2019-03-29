@@ -50,7 +50,7 @@ class EnvironmentHeadersOnResponse
                 ];
 
                 $diProfile = Container::getProfile();
-                asort($diProfile);
+                arsort($diProfile);
 
                 $json['Extra'] = array_filter([
                     '_Warning'   => "Do not depend on any variables inside this block - This is for debug only!",
