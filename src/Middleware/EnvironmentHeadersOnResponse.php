@@ -49,6 +49,9 @@ class EnvironmentHeadersOnResponse
                     "Time"     => $sqlQueryTime,
                 ];
 
+                $diProfile = Container::getProfile();
+                asort($diProfile);
+
                 $json['Extra'] = array_filter([
                     '_Warning'   => "Do not depend on any variables inside this block - This is for debug only!",
                     'Hostname'   => gethostname(),
@@ -74,7 +77,7 @@ class EnvironmentHeadersOnResponse
                             "Requests" => [],
                             "Time"     => []
                         ],
-                    'DI' => asort(Container::getProfile()),
+                    'DI' => $diProfile,
                 ]);
             }
 
