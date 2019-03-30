@@ -103,8 +103,8 @@ abstract class CrudController extends Controller
         $newObjectArray = $request->getParsedBody();
         try {
             $objects = [];
-            foreach ($newObjectArray as $newObjectArrayItem) {
-                $objects[] = $this->getService()->create($newObjectArrayItem);
+            foreach ($newObjectArray as $key=>$newObjectArrayItem) {
+                $objects[$key] = $this->getService()->create($newObjectArrayItem);
             }
             return $this->jsonSuccessResponse(
                 [
