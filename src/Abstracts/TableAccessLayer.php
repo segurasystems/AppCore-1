@@ -257,7 +257,6 @@ abstract class TableAccessLayer
     public function getAll(Query $filter = null)
     {
         $select = $this->getSelectForQuery($filter);
-        return $this->getWithSelect($select);
         if (!empty($filter)) {
             if (!empty($filter->getColumns())) {
                 return $this->getWithSelectRaw($select);
