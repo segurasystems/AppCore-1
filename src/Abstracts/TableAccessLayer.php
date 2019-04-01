@@ -261,6 +261,29 @@ abstract class TableAccessLayer
         if (!empty($filter)) {
             if (!empty($filter->getColumns())) {
                 $result = $this->getWithSelectRaw($select);
+                $types = $filter->getTyping();
+                if(!empty($types)) {
+                    $result = array_map(function ($item) use ($types) {
+                        foreach ($types as $field => $type) {
+                            if (isset($item[$field]) && $type) {
+                                $value = $item[$field];
+                                switch ($type) {
+                                    case "int":
+                                    case "integer":
+                                        $value = intval($value);
+                                        break;
+                                    case "decimal":
+                                    case "float":
+                                    case "double":
+                                        $value = floatval($value);
+                                        break;
+                                }
+                                $item[$field] = $value;
+                            }
+                        }
+                        return $item;
+                    }, $result);
+                }
                 if(count($filter->getColumns()) === 1){
                     $columns = $filter->getColumns();
                     $key = array_keys($columns)[0];
