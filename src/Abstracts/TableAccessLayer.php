@@ -9,8 +9,6 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use Gone\SDK\Common\Filters\Filter;
-use Gone\SDK\Common\Filters\FilterCondition;
 use Gone\SDK\Common\QueryBuilder\Condition;
 use Gone\SDK\Common\QueryBuilder\ConditionGroup;
 use Gone\SDK\Common\QueryBuilder\Join;
@@ -254,12 +252,19 @@ abstract class TableAccessLayer
     /**
      * @param Query|null $filter
      *
-     * @return AbstractModel[]
+     * @return AbstractModel[]|array
      */
     public function getAll(Query $filter = null)
     {
         $select = $this->getSelectForQuery($filter);
         return $this->getWithSelect($select);
+        if (!empty($filter)) {
+            if (!empty($filter->getColumns())) {
+                return $this->getWithSelectRaw($select);
+            }
+        }
+        return $this->getWithSelect($select);
+
     }
 
     public function getAllField(string $field, Query $filter = null, string $type = null)
@@ -270,27 +275,8 @@ abstract class TableAccessLayer
     public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
         $select = $this->getSelectForQuery($filter);
-        $select->columns($fields, false);
-        return array_map(function ($item) use ($types) {
-            foreach ($types as $field => $type) {
-                if (isset($item[$field]) && $type) {
-                    $value = $item[$field];
-                    switch ($type) {
-                        case "int":
-                        case "integer":
-                            $value = intval($value);
-                            break;
-                        case "decimal":
-                        case "float":
-                        case "double":
-                            $value = floatval($value);
-                            break;
-                    }
-                    $item[$field] = $value;
-                }
-            }
-            return $item;
-        }, $this->getWithSelectRaw($select));
+        $select->columns($fields,false);
+        return $this->getWithSelectRaw($select);
     }
 
     /**
@@ -365,6 +351,13 @@ abstract class TableAccessLayer
         $this->applyFilterWhereToSelect($select, $filter);
         $this->applyFilterJoinsToSelect($select, $filter);
         $this->applyFilterDistinctToSelect($select, $filter);
+        $this->applyFilterColumnsToSelect($select,$filter);
+    }
+
+    private function applyFilterColumnsToSelect(Select $select, Query $filter) {
+        if(!empty($filter->getColumns())) {
+            $select->columns($filter->getColumns(), false);
+        }
     }
 
     private function applyFilterLimitToSelect(Select $select, Query $filter)
