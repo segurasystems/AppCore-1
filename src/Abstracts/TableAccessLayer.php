@@ -256,7 +256,8 @@ abstract class TableAccessLayer
      */
     public function getAll(Query $filter = null)
     {
-        $select = $this->getSelectForQuery($filter);
+        //print json_encode($filter);die();
+        $select = $this->createSelectFromQuery($filter);
         if (!empty($filter)) {
             if (!empty($filter->getColumns())) {
                 return $this->getWithSelectRaw($select);
@@ -273,8 +274,8 @@ abstract class TableAccessLayer
 
     public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
-        $select = $this->getSelectForQuery($filter);
-        $select->columns($fields,false);
+        $select = $this->createSelectFromQuery($filter);
+        $select->columns($fields, false);
         return $this->getWithSelectRaw($select);
     }
 
@@ -286,7 +287,7 @@ abstract class TableAccessLayer
     public function count(Query $filter = null)
     {
         $filter->limit(0)->offset(0)->setOrder([]);
-        $select = $this->getSelectForQuery($filter);
+        $select = $this->createSelectFromQuery($filter);
         $select->columns(['count' => new Expression('IFNULL(COUNT(*),0)')]);
         $row = $this->getSQL()
             ->prepareStatementForSqlObject($select)
@@ -328,19 +329,18 @@ abstract class TableAccessLayer
         if (empty($filter)) {
             $filter = Query::Factory();
         }
-        $select = $this->getSelectForQuery($filter);
-        $this->applyQueryToSelect($select, $filter);
-        return $select;
-    }
 
-    private function getSelectForQuery(Query $filter)
-    {
+
         if (empty($filter->getBaseTable()) || $filter->getBaseTable() === $this->table) {
             $sql = $this->getSQL();
         } else {
             $sql = new Sql($this->_adapter, $filter->getBaseTable());
         }
-        return $sql->select();
+
+
+        $select = $sql->select();
+        $this->applyQueryToSelect($select, $filter);
+        return $select;
     }
 
     private function applyQueryToSelect(Select $select, Query $filter)
@@ -350,11 +350,12 @@ abstract class TableAccessLayer
         $this->applyFilterWhereToSelect($select, $filter);
         $this->applyFilterJoinsToSelect($select, $filter);
         $this->applyFilterDistinctToSelect($select, $filter);
-        $this->applyFilterColumnsToSelect($select,$filter);
+        $this->applyFilterColumnsToSelect($select, $filter);
     }
 
-    private function applyFilterColumnsToSelect(Select $select, Query $filter) {
-        if(!empty($filter->getColumns())) {
+    private function applyFilterColumnsToSelect(Select $select, Query $filter)
+    {
+        if (!empty($filter->getColumns())) {
             $select->columns($filter->getColumns(), false);
         }
     }
