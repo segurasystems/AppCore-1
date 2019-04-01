@@ -260,7 +260,16 @@ abstract class TableAccessLayer
         $select = $this->createSelectFromQuery($filter);
         if (!empty($filter)) {
             if (!empty($filter->getColumns())) {
-                return $this->getWithSelectRaw($select);
+                $result = $this->getWithSelectRaw($select);
+                if(count($filter->getColumns()) === 1){
+                    $columns = $filter->getColumns();
+                    $key = array_keys($columns)[0];
+                    if(is_numeric($key)){
+                        $key = $columns[$key];
+                    }
+                    return array_column($result,$key);
+                }
+                return $result;
             }
         }
         return $this->getWithSelect($select);
