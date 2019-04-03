@@ -9,6 +9,8 @@ class Route
     const ACCESS_PUBLIC = 'public';
     const ACCESS_PRIVATE = 'private';
 
+    const ARGUMENT_ACCESS = "access";
+
     protected $name;
     protected $callback;
 //    protected $SDKClass;
@@ -191,7 +193,7 @@ class Route
         );
 
         $mapping->setName($this->getName() ? $this->getName() : "Unnamed Route");
-        $mapping->setArgument('access', $this->getAccess());
+        $mapping->setArgument(self::ARGUMENT_ACCESS, $this->getAccess());
         foreach ($this->getArguments() as $key => $value) {
             $mapping->setArgument(trim(strtolower($key)), $value);
         }
