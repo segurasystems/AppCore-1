@@ -16,11 +16,11 @@ abstract class CrudController extends Controller
 
     public function getAllRequest(Request $request, Response $response): Response
     {
-        if($request->hasHeader("fields")){
-            return $this->getFieldsRequest($request,$response);
+        if ($request->hasHeader("fields")) {
+            return $this->getFieldsRequest($request, $response);
         }
-        if($request->hasHeader("count")){
-            return $this->getCountRequest($request,$response);
+        if ($request->hasHeader("count")) {
+            return $this->getCountRequest($request, $response);
         }
 
         $service = $this->getService();
@@ -30,7 +30,7 @@ abstract class CrudController extends Controller
 
         return $this->jsonSuccessResponse(
             [
-                'Action'          => 'LIST',
+                'Action' => 'LIST',
                 $this->pluralTerm => $service->getAll($filter),
             ],
             $request,
@@ -44,7 +44,7 @@ abstract class CrudController extends Controller
         if ($object) {
             return $this->jsonSuccessResponse(
                 [
-                    'Action'            => 'GET',
+                    'Action' => 'GET',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -67,9 +67,15 @@ abstract class CrudController extends Controller
         $newObjectArray = $request->getParsedBody();
         try {
             $object = $this->getService()->update($args, $newObjectArray);
+            if ($object === false) {
+                return $this->jsonFailureResponse([
+                    "Reason" => "Validation failure",
+                    "Errors" => $this->getService()->getValidationErrors()
+                ], $request, $response);
+            }
             return $this->jsonSuccessResponse(
                 [
-                    'Action'            => 'UPDATE',
+                    'Action' => 'UPDATE',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -85,9 +91,15 @@ abstract class CrudController extends Controller
         $newObjectArray = $request->getParsedBody();
         try {
             $object = $this->getService()->create($newObjectArray);
+            if ($object === false) {
+                return $this->jsonFailureResponse([
+                    "Reason" => "Validation failure",
+                    "Errors" => $this->getService()->getValidationErrors()
+                ], $request, $response);
+            }
             return $this->jsonSuccessResponse(
                 [
-                    'Action'            => 'CREATE',
+                    'Action' => 'CREATE',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -98,17 +110,30 @@ abstract class CrudController extends Controller
         }
     }
 
+    public function validateRequest(Request $request, Response $response): Response
+    {
+        $newObjectArray = $request->getParsedBody();
+        return $this->jsonSuccessResponse(
+            [
+                'Action' => 'VALIDATE',
+                'Validation' => $this->getService()->validateData($newObjectArray),
+            ],
+            $request,
+            $response
+        );
+    }
+
     public function createBulkRequest(Request $request, Response $response): Response
     {
         $newObjectArray = $request->getParsedBody();
         try {
             $objects = [];
-            foreach ($newObjectArray as $key=>$newObjectArrayItem) {
+            foreach ($newObjectArray as $key => $newObjectArrayItem) {
                 $objects[$key] = $this->getService()->create($newObjectArrayItem);
             }
             return $this->jsonSuccessResponse(
                 [
-                    'Action'          => 'BULK_CREATE',
+                    'Action' => 'BULK_CREATE',
                     $this->pluralTerm => $objects,
                 ],
                 $request,
@@ -139,7 +164,7 @@ abstract class CrudController extends Controller
         }
         return $this->jsonSuccessResponse(
             [
-                'Action'          => 'LIST_FIELDS',
+                'Action' => 'LIST_FIELDS',
                 $this->pluralTerm => $result,
             ],
             $request,
@@ -155,7 +180,7 @@ abstract class CrudController extends Controller
 
         return $this->jsonSuccessResponse(
             [
-                'Action'          => 'COUNT',
+                'Action' => 'COUNT',
                 $this->pluralTerm => $result,
             ],
             $request,

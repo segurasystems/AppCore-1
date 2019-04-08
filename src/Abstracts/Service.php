@@ -4,7 +4,9 @@ namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
 //use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\Cleaner\AbstractCleaner;
 use Gone\SDK\Common\QueryBuilder\Query;
+use Gone\SDK\Common\Validator\AbstractValidator;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
@@ -13,12 +15,21 @@ abstract class Service
 {
     /** @var TableAccessLayer */
     private $tableAccessLayer;
+    /** @var AbstractValidator */
+    private $validator;
+    /** @var AbstractCleaner */
+    private $cleaner;
 
     protected $modelClass;
 
-    public function __construct(TableAccessLayer $tableAccessLayer)
-    {
+    public function __construct(
+        TableAccessLayer $tableAccessLayer,
+        AbstractValidator $validator = null,
+        AbstractCleaner $cleaner = null
+    ) {
         $this->tableAccessLayer = $tableAccessLayer;
+        $this->validator = $validator;
+        $this->cleaner = $cleaner;
         $this->__afterConstruct();
     }
 
@@ -34,12 +45,51 @@ abstract class Service
 
     /**
      * @param AbstractModel $model
+     * @return bool
+     */
+    public function validate(AbstractModel $model)
+    {
+        if ($this->validator instanceof AbstractValidator) {
+            return $this->validator->validate($model);
+        }
+        return true;
+    }
+
+    public function validateData(array $data){
+        $model = new $this->modelClass($data);
+        return $this->validate($model);
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidationErrors()
+    {
+        if ($this->validator instanceof AbstractValidator) {
+            return $this->validator->getErrors();
+        }
+        return [];
+    }
+
+    public function clean(AbstractModel $model)
+    {
+        if ($this->cleaner instanceof AbstractCleaner) {
+            $this->cleaner->clean($model);
+        }
+    }
+
+    /**
+     * @param AbstractModel $model
      *
-     * @return AbstractModel|null
+     * @return AbstractModel|null|false
      */
     public function save(AbstractModel $model)
     {
-        return $this->getAccessLayer()->save($model);
+        $this->clean($model);
+        if ($this->validate($model)) {
+            return $this->getAccessLayer()->save($model);
+        }
+        return false;
     }
 
     public function update($pk, $dataArray)
