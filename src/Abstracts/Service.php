@@ -4,9 +4,9 @@ namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
 //use Gone\SDK\Common\Filters\Filter;
-use Gone\SDK\Common\Cleaner\AbstractCleaner;
+use Gone\AppCore\Abstracts\Cleaner as AbstractCleaner;
 use Gone\SDK\Common\QueryBuilder\Query;
-use Gone\SDK\Common\Validator\AbstractValidator;
+use Gone\AppCore\Validator\AbstractValidator;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
