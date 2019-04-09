@@ -13,25 +13,12 @@ class Route
 
     protected $name;
     protected $callback;
-//    protected $SDKClass;
-//    protected $SDKFunction;
-//    protected $SDKTemplate = "callback";
-//    protected $SDKModelSafe = false;
-//    protected $SDKTableName;
-//    protected $SDKHydrate = false;
-//    protected $SDKResponseKey;
     protected $routerPattern;
     protected $httpEndpoint;
     protected $httpMethod = "GET";
     protected $weight = 0;
-//    protected $singular;
-//    protected $plural;
-//    protected $properties;
-//    protected $propertyData = [];
-//    protected $propertyOptions;
     protected $exampleEntity;
     protected $exampleEntityFinderFunction;
-//    protected $callbackProperties = [];
     protected $access = self::ACCESS_PUBLIC;
     protected $arguments = [];
 
@@ -181,7 +168,7 @@ class Route
     /**
      * @param App $app
      *
-     * @return \Slim\App
+     * @return App
      */
     public function populateRoute(App $app): App
     {

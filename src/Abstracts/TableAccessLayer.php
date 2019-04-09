@@ -1,19 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: wolfgang
- * Date: 10/03/2019
- * Time: 13:50
- */
 
 namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use Gone\SDK\Common\QueryBuilder\Condition;
-use Gone\SDK\Common\QueryBuilder\ConditionGroup;
-use Gone\SDK\Common\QueryBuilder\Join;
-use Gone\SDK\Common\QueryBuilder\Query;
-use mysql_xdevapi\Exception;
+use Gone\AppCore\QueryBuilder\Condition;
+use Gone\AppCore\QueryBuilder\ConditionGroup;
+use Gone\AppCore\QueryBuilder\Join;
+use Gone\AppCore\QueryBuilder\Query;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
@@ -28,10 +21,9 @@ use Zend\Db\Sql\Predicate\PredicateInterface;
 use Zend\Db\Sql\Predicate\PredicateSet;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Where;
 use \Zend\Db\TableGateway\TableGateway as TableGateway;
-use Zend\Db\Sql\Sql as ZendSQL;
 use Gone\SDK\Common\Abstracts\AbstractModel as Model;
+use Exception;
 
 abstract class TableAccessLayer
 {
@@ -240,7 +232,8 @@ abstract class TableAccessLayer
     /**
      * @param Query $filter
      *
-     * @return AbstractModel|null
+     * @return mixed|null
+     * @throws Exception
      */
     public function get(Query $filter)
     {
@@ -252,7 +245,8 @@ abstract class TableAccessLayer
     /**
      * @param Query|null $filter
      *
-     * @return AbstractModel[]|array
+     * @return array
+     * @throws Exception
      */
     public function getAll(Query $filter = null)
     {
@@ -299,11 +293,27 @@ abstract class TableAccessLayer
 
     }
 
+    /**
+     * @param string      $field
+     * @param Query|null  $filter
+     * @param string|null $type
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getAllField(string $field, Query $filter = null, string $type = null)
     {
         return array_column($this->getAllFields([$field], $filter, [$field => $type]), $field);
     }
 
+    /**
+     * @param array      $fields
+     * @param Query|null $filter
+     * @param array      $types
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
         $select = $this->createSelectFromQuery($filter);
@@ -315,6 +325,7 @@ abstract class TableAccessLayer
      * @param Query|null $filter
      *
      * @return int
+     * @throws Exception
      */
     public function count(Query $filter = null)
     {
@@ -335,6 +346,7 @@ abstract class TableAccessLayer
      */
     private function getWithSelect(Select $select)
     {
+        /** @var ResultSet $resultSet */
         $resultSet = $this->getTableGateway()->selectWith($select);
         $results = [];
         for ($i = 0; $i < $resultSet->count(); $i++) {
@@ -346,7 +358,7 @@ abstract class TableAccessLayer
 
     private function getWithSelectRaw(Select $select)
     {
-
+        /** @var ResultSet $resultSet */
         $resultSet = $this->getRawTableGateway()->selectWith($select);
         $results = [];
         for ($i = 0; $i < $resultSet->count(); $i++) {
@@ -356,6 +368,12 @@ abstract class TableAccessLayer
         return $results;
     }
 
+    /**
+     * @param Query|null $filter
+     *
+     * @return Select
+     * @throws Exception
+     */
     private function createSelectFromQuery(Query $filter = null): Select
     {
         if (empty($filter)) {
@@ -375,6 +393,12 @@ abstract class TableAccessLayer
         return $select;
     }
 
+    /**
+     * @param Select $select
+     * @param Query  $filter
+     *
+     * @throws Exception
+     */
     private function applyQueryToSelect(Select $select, Query $filter)
     {
         $this->applyFilterLimitToSelect($select, $filter);
@@ -415,6 +439,12 @@ abstract class TableAccessLayer
         }
     }
 
+    /**
+     * @param Select $select
+     * @param Query  $filter
+     *
+     * @throws Exception
+     */
     private function applyFilterWhereToSelect(Select $select, Query $filter)
     {
         $condition = $filter->getCondition();
@@ -451,11 +481,23 @@ abstract class TableAccessLayer
         $select->join($table, "{$alias}.{$from[1]} = {$to[0]}.{$to[1]}", [], $join->getType() ?? Select::JOIN_INNER);
     }
 
+    /**
+     * @param Select         $select
+     * @param ConditionGroup $condition
+     *
+     * @throws Exception
+     */
     private function applyFilterConditionGroupToSelect(Select $select, ConditionGroup $condition)
     {
         $select->where($this->createPredicateFromConditionGroup($condition));
     }
 
+    /**
+     * @param ConditionGroup $conditionGroup
+     *
+     * @return PredicateSet
+     * @throws Exception
+     */
     private function createPredicateFromConditionGroup(ConditionGroup $conditionGroup)
     {
         $predicates = [];
@@ -475,7 +517,7 @@ abstract class TableAccessLayer
      * @param Condition $condition
      *
      * @return PredicateInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function createPredicateFromCondition(Condition $condition)
     {
@@ -512,7 +554,7 @@ abstract class TableAccessLayer
             case Condition::NOT_EQUAL:
                 return new Operator($field, $condition->getComparator(), $value);
             default:
-                throw new \Exception("Unable to map comparator for condition to predicate");
+                throw new Exception("Unable to map comparator for condition to predicate");
                 break;
         }
     }
