@@ -9,7 +9,7 @@ final class ValidatorRule
     protected $fields = [];
     /** @var Validatable */
     protected $rule;
-    protected $scenario = AbstractValidator::SCENARIO_DEFAULT;
+    protected $scenarios = [AbstractValidator::SCENARIO_DEFAULT];
 
     private function __construct()
     {
@@ -41,14 +41,31 @@ final class ValidatorRule
         return $this;
     }
 
-    public function getScenario(): string
+    public function hasScenario($scenario): bool
     {
-        return $this->scenario;
+        return in_array($scenario,$this->getScenarios());
     }
 
-    public function setScenario(string $scenario)
+    public function getScenarios(): array
     {
-        $this->scenario = $scenario;
+        return $this->scenarios;
+    }
+
+    public function setScenario($scenario)
+    {
+        $this->setScenarios($scenario);
+        return $this;
+    }
+
+    public function setScenarios($scenarios)
+    {
+        if (empty($scenarios)) {
+            $scenarios = [AbstractValidator::SCENARIO_DEFAULT];
+        }
+        if (!is_array($scenarios)) {
+            $scenarios = [$scenarios];
+        }
+        $this->scenarios = $scenarios;
         return $this;
     }
 

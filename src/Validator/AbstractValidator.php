@@ -58,12 +58,11 @@ abstract class AbstractValidator implements ValidatorInterface
      *
      * @return ValidatorRule[]
      */
-    private function getScenarioRules(string $scenario = null): array
+    private function getScenarioRules(string $scenario): array
     {
         $rules = [];
         foreach ($this->getRules() as $rule) {
-            $ruleScenario = $rule->getScenario();
-            if ($ruleScenario === self::SCENARIO_ALL || $scenario === $ruleScenario || $scenario === self::SCENARIO_ALL) {
+            if ($rule->hasScenario($scenario) || $scenario === self::SCENARIO_ALL) {
                 $rules[] = $rule;
             }
         }
