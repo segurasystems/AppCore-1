@@ -2,16 +2,24 @@
 
 namespace Gone\AppCore\Abstracts;
 
+use Gone\AppCore\Validator\AbstractValidator;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
+use Exception;
 
 abstract class CrudController extends Controller
 {
     protected $singularTerm = "Data";
     protected $pluralTerm = "Datas";
 
-
+    /**
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return Response
+     * @throws Exception
+     */
     public function getAllRequest(Request $request, Response $response): Response
     {
         if ($request->hasHeader("fields")) {
@@ -28,7 +36,7 @@ abstract class CrudController extends Controller
 
         return $this->jsonSuccessResponse(
             [
-                'Action' => 'LIST',
+                'Action'          => 'LIST',
                 $this->pluralTerm => $service->getAll($filter),
             ],
             $request,
@@ -42,7 +50,7 @@ abstract class CrudController extends Controller
         if ($object) {
             return $this->jsonSuccessResponse(
                 [
-                    'Action' => 'GET',
+                    'Action'            => 'GET',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -73,7 +81,7 @@ abstract class CrudController extends Controller
             }
             return $this->jsonSuccessResponse(
                 [
-                    'Action' => 'UPDATE',
+                    'Action'            => 'UPDATE',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -97,7 +105,7 @@ abstract class CrudController extends Controller
             }
             return $this->jsonSuccessResponse(
                 [
-                    'Action' => 'CREATE',
+                    'Action'            => 'CREATE',
                     $this->singularTerm => $object,
                 ],
                 $request,
@@ -111,37 +119,54 @@ abstract class CrudController extends Controller
     public function validateRequest(Request $request, Response $response): Response
     {
         $newObjectArray = $request->getParsedBody();
+
+        $scenario = $request->getHeader("scenario");
+        if (empty($scenario)) {
+            $scenario = AbstractValidator::SCENARIO_DEFAULT;
+        } else {
+            if (is_array($scenario)) {
+                $scenario = $scenario[0];
+            }
+        }
+
         return $this->jsonSuccessResponse(
             [
-                'Action' => 'VALIDATE',
-                'Validation' => $this->getService()->validateData($newObjectArray),
+                'Action'     => 'VALIDATE',
+                'Validation' => $this->getService()->validateData($newObjectArray, $scenario),
             ],
             $request,
             $response
         );
     }
 
-    public function createBulkRequest(Request $request, Response $response): Response
-    {
-        $newObjectArray = $request->getParsedBody();
-        try {
-            $objects = [];
-            foreach ($newObjectArray as $key => $newObjectArrayItem) {
-                $objects[$key] = $this->getService()->create($newObjectArrayItem);
-            }
-            return $this->jsonSuccessResponse(
-                [
-                    'Action' => 'BULK_CREATE',
-                    $this->pluralTerm => $objects,
-                ],
-                $request,
-                $response
-            );
-        } catch (InvalidQueryException $iqe) {
-            return $this->jsonResponseException($iqe, $request, $response);
-        }
-    }
+//    public function createBulkRequest(Request $request, Response $response): Response
+//    {
+//        $newObjectArray = $request->getParsedBody();
+//        try {
+//            $objects = [];
+//            foreach ($newObjectArray as $key => $newObjectArrayItem) {
+//                $objects[$key] = $this->getService()->create($newObjectArrayItem);
+//            }
+//            return $this->jsonSuccessResponse(
+//                [
+//                    'Action'          => 'BULK_CREATE',
+//                    $this->pluralTerm => $objects,
+//                ],
+//                $request,
+//                $response
+//            );
+//        } catch (InvalidQueryException $iqe) {
+//            return $this->jsonResponseException($iqe, $request, $response);
+//        }
+//    }
 
+    /**
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return Response
+     * @throws Exception
+     */
     public function getFieldsRequest(Request $request, Response $response): Response
     {
         $filter = $this->parseQueryHeader($request);
@@ -162,7 +187,7 @@ abstract class CrudController extends Controller
         }
         return $this->jsonSuccessResponse(
             [
-                'Action' => 'LIST_FIELDS',
+                'Action'          => 'LIST_FIELDS',
                 $this->pluralTerm => $result,
             ],
             $request,
@@ -170,6 +195,13 @@ abstract class CrudController extends Controller
         );
     }
 
+    /**
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return Response
+     * @throws Exception
+     */
     public function getCountRequest(Request $request, Response $response): Response
     {
         $filter = $this->parseQueryHeader($request);
@@ -178,7 +210,7 @@ abstract class CrudController extends Controller
 
         return $this->jsonSuccessResponse(
             [
-                'Action' => 'COUNT',
+                'Action'          => 'COUNT',
                 $this->pluralTerm => $result,
             ],
             $request,

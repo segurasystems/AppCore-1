@@ -3,13 +3,10 @@
 namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
-//use Gone\SDK\Common\Filters\Filter;
 use Gone\AppCore\Abstracts\Cleaner as AbstractCleaner;
 use Gone\AppCore\QueryBuilder\Query;
 use Gone\AppCore\Validator\AbstractValidator;
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\Sql\Expression;
-use Zend\Db\Sql\Select;
+use Exception;
 
 abstract class Service
 {
@@ -45,19 +42,22 @@ abstract class Service
 
     /**
      * @param AbstractModel $model
+     * @param string        $scenario
+     *
      * @return bool
      */
-    public function validate(AbstractModel $model)
+    public function validate(AbstractModel $model, string $scenario = AbstractValidator::SCENARIO_DEFAULT)
     {
         if ($this->validator instanceof AbstractValidator) {
-            return $this->validator->validate($model);
+            return $this->validator->validate($model, $scenario);
         }
         return true;
     }
 
-    public function validateData(array $data){
+    public function validateData(array $data, string $scenario = AbstractValidator::SCENARIO_DEFAULT)
+    {
         $model = new $this->modelClass($data);
-        return $this->validate($model);
+        return $this->validate($model, $scenario);
     }
 
     /**
@@ -123,7 +123,8 @@ abstract class Service
     /**
      * @param Query $filter
      *
-     * @return AbstractModel|null
+     * @return mixed|null
+     * @throws Exception
      */
     public function get(Query $filter)
     {
@@ -132,9 +133,10 @@ abstract class Service
     }
 
     /**
-     * @param Query $filter
+     * @param Query|null $filter
      *
-     * @return AbstractModel[]
+     * @return array
+     * @throws Exception
      */
     public function getAll(Query $filter = null): array
     {
@@ -143,9 +145,10 @@ abstract class Service
     }
 
     /**
-     * @param Query $filter
+     * @param Query|null $filter
      *
      * @return int
+     * @throws Exception
      */
     public function count(Query $filter = null): int
     {
@@ -153,11 +156,27 @@ abstract class Service
             ->count($filter);
     }
 
+    /**
+     * @param string      $field
+     * @param Query|null  $filter
+     * @param string|null $type
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getAllField(string $field, Query $filter = null, string $type = null)
     {
         return $this->getAccessLayer()->getAllField($field, $filter, $type);
     }
 
+    /**
+     * @param array      $fields
+     * @param Query|null $filter
+     * @param array      $types
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
         return $this->getAccessLayer()->getAllFields($fields, $filter, $types);

@@ -9,7 +9,7 @@ final class ValidatorRule
     protected $fields = [];
     /** @var Validatable */
     protected $rule;
-    protected $scenario = AbstractValidator::SCENARIO_ALL;
+    protected $scenario = AbstractValidator::SCENARIO_DEFAULT;
 
     private function __construct()
     {
