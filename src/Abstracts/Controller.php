@@ -4,7 +4,7 @@ namespace Gone\AppCore\Abstracts;
 use Gone\AppCore\Controllers\InlineCssTrait;
 use Gone\SDK\Common\Exceptions\FilterDecodeException;
 use Gone\SDK\Common\Filters\Filter;
-use Gone\SDK\Common\QueryBuilder\Query;
+use Gone\AppCore\QueryBuilder\Query;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

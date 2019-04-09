@@ -2,8 +2,6 @@
 
 namespace Gone\AppCore\Abstracts;
 
-use Gone\AppCore\Interfaces\ModelInterface;
-use Gone\SDK\Common\Filters\Filter;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
