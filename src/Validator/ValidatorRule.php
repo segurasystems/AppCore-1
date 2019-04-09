@@ -57,8 +57,11 @@ final class ValidatorRule
         return ($this->rule instanceof Validatable);
     }
 
-    public function validate($value): bool
+    public function validate($value, string $field, array $data = []): bool
     {
+        if (method_exists($this->rule, "beforeCheck")) {
+            $this->rule->beforeCheck($field, $data);
+        }
         return $this->rule->check($value);
     }
 

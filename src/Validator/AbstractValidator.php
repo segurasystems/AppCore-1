@@ -44,7 +44,7 @@ abstract class AbstractValidator implements ValidatorInterface
             $lckey = strtolower($key);
             $value = $data[$lckey] ?? null;
             try {
-                $rule->validate($value);
+                $rule->validate($value,$key,$data);
             } catch (ValidationException $e) {
                 $this->errors[$key][] = $e->getMainMessage();
                 $pass = false;
