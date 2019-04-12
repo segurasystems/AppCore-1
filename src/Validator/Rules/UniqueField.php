@@ -8,7 +8,7 @@ use Gone\AppCore\Abstracts\TableAccessLayer;
 use Gone\AppCore\QueryBuilder\Condition;
 use Gone\AppCore\QueryBuilder\Query;
 
-class UniqueFieldRule extends BaseRule
+class UniqueField extends BaseRule
 {
     /** @var string */
     private $field;
