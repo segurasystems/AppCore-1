@@ -8,10 +8,10 @@ class UniqueFieldException extends ValidationException
 {
     public static $defaultTemplates = [
         self::MODE_DEFAULT => [
-            self::STANDARD => '{{ name }} must be unique',
+            self::STANDARD => '{{name}} must be unique',
         ],
         self::MODE_NEGATIVE => [
-            self::STANDARD => '{{ name }} must not be unique',
+            self::STANDARD => '{{name}} must not be unique',
         ],
     ];
 }
