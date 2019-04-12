@@ -33,6 +33,7 @@ class UniqueField extends BaseRule
 
     public function beforeCheck(string $field, array $data)
     {
+        $this->setName($field);
         $this->field = $field;
         $this->data = $data;
     }
