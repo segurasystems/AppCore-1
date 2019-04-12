@@ -336,7 +336,7 @@ abstract class TableAccessLayer
             ->prepareStatementForSqlObject($select)
             ->execute()
             ->current();
-        return $row["count"] ?? 0;
+        return intval($row["count"] ?? 0);
     }
 
     /**
