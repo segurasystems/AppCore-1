@@ -18,6 +18,7 @@ class RouteSDKProperties implements \JsonSerializable
     protected $returnsArray = false;
     protected $responseClass;
     protected $arguments;
+    protected $cacheTime = 0;
 
     public static function Factory()
     {
@@ -39,6 +40,7 @@ class RouteSDKProperties implements \JsonSerializable
             "responseClass" => $this->getResponseClass(),
             "class" => $this->getClass(),
             "returnsArray" => $this->getReturnsArray(),
+            "cacheTime" => $this->getCacheTime(),
         ];
     }
 
@@ -196,6 +198,25 @@ class RouteSDKProperties implements \JsonSerializable
     public function setClass($class)
     {
         $this->class = $class;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCacheTime(): int
+    {
+        return $this->cacheTime;
+    }
+
+    /**
+     * @param int $cacheTime
+     *
+     * @return RouteSDKProperties
+     */
+    public function setCacheTime(int $cacheTime): RouteSDKProperties
+    {
+        $this->cacheTime = $cacheTime;
         return $this;
     }
 
