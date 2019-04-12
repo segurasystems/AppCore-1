@@ -129,12 +129,12 @@ abstract class CrudController extends Controller
             }
         }
 
-        $valid = $this->getService()->validateData($newObjectArray, $scenario);
+        $this->getService()->validateData($newObjectArray, $scenario);
 
         return $this->jsonSuccessResponse(
             [
                 'Action'     => 'VALIDATE',
-                'Validation' => $valid ? $valid : $this->getService()->getValidationErrors(),
+                'Validation' => $this->getService()->getValidationErrors(),
             ],
             $request,
             $response
