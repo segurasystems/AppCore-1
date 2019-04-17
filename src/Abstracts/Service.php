@@ -43,7 +43,11 @@ abstract class Service
 
     }
 
-    protected function getAccessLayer()
+    protected final function getSelect(){
+        return $this->getAccessLayer()->getSelect();
+    }
+
+    protected final function getAccessLayer() : TableAccessLayer
     {
         return $this->tableAccessLayer;
     }
