@@ -53,6 +53,10 @@ abstract class Service
         return $this->tableAccessLayer;
     }
 
+    protected function prepModelForSave(AbstractModel $model) {
+        return $model;
+    }
+
     /**
      * @param AbstractModel $model
      * @param string        $scenario
@@ -61,6 +65,8 @@ abstract class Service
      */
     public function validate(AbstractModel $model, string $scenario = AbstractValidator::SCENARIO_DEFAULT)
     {
+        $this->prepModelForSave($model);
+        $this->clean($model);
         if ($this->validator instanceof AbstractValidator) {
             return $this->validator->validate($model, $scenario);
         }
@@ -98,7 +104,6 @@ abstract class Service
      */
     public function save(AbstractModel $model)
     {
-        $this->clean($model);
         if ($this->validate($model)) {
             return $this->getAccessLayer()->save($model);
         }
