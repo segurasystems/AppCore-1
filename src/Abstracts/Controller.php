@@ -4,7 +4,6 @@ namespace Gone\AppCore\Abstracts;
 use Gone\AppCore\Controllers\InlineCssTrait;
 use Gone\SDK\Common\Exceptions\FilterDecodeException;
 use Gone\SDK\Common\Filters\Filter;
-use Gone\AppCore\QueryBuilder\Query;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -30,7 +29,9 @@ abstract class Controller
     }
 
     /**
-     * @param Service $service
+     * @param $service
+     *
+     * @return Controller
      */
     public function setService($service) : self
     {
@@ -41,13 +42,15 @@ abstract class Controller
     /**
      * @return bool
      */
-    public function isApiExplorerEnabled()  : self
+    public function isApiExplorerEnabled()  : bool
     {
         return $this->apiExplorerEnabled;
     }
 
     /**
      * @param bool $apiExplorerEnabled
+     *
+     * @return Controller
      */
     public function setApiExplorerEnabled(bool $apiExplorerEnabled) : self
     {
@@ -55,7 +58,7 @@ abstract class Controller
         return $this;
     }
 
-    public function jsonResponse($json, Request $request, Response $response) : Response
+    private function jsonResponse($json, Response $response) : Response
     {
         return $response->withJson($json);
     }
@@ -67,7 +70,6 @@ abstract class Controller
                 'Status' => 'Fail',
                 'Reason' => $e->getMessage(),
             ],
-            $request,
             $response
         );
     }
@@ -83,7 +85,6 @@ abstract class Controller
         }
         return $this->jsonResponse(
             $data,
-            $request,
             $response
         );
     }
@@ -91,7 +92,6 @@ abstract class Controller
     public function jsonSuccessResponse(array $data,Request $request ,Response $response){
         return $this->jsonResponse(
             array_merge(['Status' => 'Okay'],$data),
-            $request,
             $response
         );
     }
@@ -99,11 +99,11 @@ abstract class Controller
     /**
      * Decide if a request has a json header attached to it.
      *
-     * @param Request  $request
-     *
-     * @throws FilterDecodeException
+     * @param Request $request
+     * @param string  $header
      *
      * @return bool
+     * @throws FilterDecodeException
      */
     protected function requestHasJsonHeader(Request $request, string $header) : bool
     {
@@ -122,10 +122,9 @@ abstract class Controller
 
     /**
      * @param Request  $request
-     * @param Response $response
      *
      * @return Filter
-     * @throws \Gone\SDK\Common\Exceptions\FilterDecodeException
+     * @throws FilterDecodeException
      */
     protected function parseFilters(Request $request) : Filter
     {
@@ -133,13 +132,5 @@ abstract class Controller
             return Filter::CreateFromJSON($request->getHeader('Filter')[0]);
         }
         return Filter::Factory();
-    }
-
-    protected function parseQueryHeader(Request $request) : Query
-    {
-        if($this->requestHasJsonHeader($request,"Query")){
-            return Query::CreateFromJSON($request->getHeader('Query')[0]);
-        }
-        return Query::Factory();
     }
 }

@@ -4,9 +4,17 @@ namespace Gone\AppCore\Abstracts;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\AppCore\Abstracts\Cleaner as AbstractCleaner;
-use Gone\AppCore\QueryBuilder\Query;
 use Gone\AppCore\Validator\AbstractValidator;
 use Exception;
+use Gone\SDK\Common\Filters\Filter;
+use Zend\Db\Sql\Predicate\In;
+use Zend\Db\Sql\Predicate\Like;
+use Zend\Db\Sql\Predicate\NotIn;
+use Zend\Db\Sql\Predicate\NotLike;
+use Zend\Db\Sql\Predicate\Operator;
+use Zend\Db\Sql\Predicate\PredicateInterface;
+use Zend\Db\Sql\Predicate\PredicateSet;
+use Zend\Db\Sql\Select;
 
 abstract class Service
 {
@@ -121,64 +129,125 @@ abstract class Service
     }
 
     /**
-     * @param Query $filter
+     * @param Filter $filter
      *
      * @return mixed|null
      * @throws Exception
      */
-    public function get(Query $filter)
+    public function get(Filter $filter)
     {
         return $this->getAccessLayer()
-            ->get($filter);
+            ->get($this->autoFilterToSelect($filter));
     }
 
     /**
-     * @param Query|null $filter
+     * @param Filter|null $filter
      *
      * @return array
      * @throws Exception
      */
-    public function getAll(Query $filter = null): array
+    public function getAll(Filter $filter = null): array
     {
         return $this->getAccessLayer()
-            ->getAll($filter);
+            ->getAll($this->autoFilterToSelect($filter));
     }
 
     /**
-     * @param Query|null $filter
+     * @param Filter|null $filter
      *
      * @return int
      * @throws Exception
      */
-    public function count(Query $filter = null): int
+    public function count(Filter $filter = null): int
     {
         return $this->getAccessLayer()
-            ->count($filter);
+            ->count($this->autoFilterToSelect($filter));
     }
 
-    /**
-     * @param string      $field
-     * @param Query|null  $filter
-     * @param string|null $type
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getAllField(string $field, Query $filter = null, string $type = null)
+    protected function autoFilterToSelect(Filter $filter, $columnMap = []): Select
     {
-        return $this->getAccessLayer()->getAllField($field, $filter, $type);
+        $select = new Select($this->tableAccessLayer->getTable());
+        if (!empty($filter->getLimit())) {
+            $select->limit($filter->getLimit());
+        }
+        if (!empty($filter->getOffset())) {
+            $select->offset($filter->getOffset());
+        }
+        if (!empty($filter->getOrder())) {
+            $select->order($filter->getOrder());
+        }
+        $predicates = [];
+        foreach ($filter->getParameters() as $field => $value) {
+            if (!empty($columnMap)) {
+                if (isset($columnMap[$field])) {
+                    $field = $columnMap[$field];
+                } else {
+                    continue;
+                }
+            }
+            $predicates[] = $this->filterVarToPredicate($field, $value);
+        }
+        $basePredicate = $this->getBasePredicate();
+        if (!empty($basePredicate)) {
+            if (!empty($predicates)) {
+                $basePredicate->addPredicate(new PredicateSet($predicates, $filter->getCombination()));
+            }
+            $select->where($basePredicate);
+        } elseif (!empty($predicates)) {
+            $select->where(new PredicateSet($predicates, $filter->getCombination()));
+        }
+        if(!empty($filter->getColumns())){
+            $select->columns($filter->getColumns());
+        }
+        return $select;
     }
 
-    /**
-     * @param array      $fields
-     * @param Query|null $filter
-     * @param array      $types
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getAllFields(array $fields, Query $filter = null, array $types = [])
+    protected function getBasePredicate(): ?PredicateSet
     {
-        return $this->getAccessLayer()->getAllFields($fields, $filter, $types);
+        return null;
+    }
+
+    protected function filterVarToPredicate($column, $value, $negative = false): ?PredicateInterface
+    {
+        if (is_array($value)) {
+            if ($negative) {
+                return new NotIn($column, $value);
+            } else {
+                return new In($column, $value);
+            }
+        } elseif (is_string($value)) {
+            $first = substr($value, 0, 1);
+            $last = substr($value, -1);
+            if ($first === "%" || $last === "%") {
+                if ($negative) {
+                    return new NotLike($column, $value);
+                } else {
+                    return new Like($column, $value);
+                }
+            } elseif ($first === ">") {
+                if ($negative) {
+                    return new Operator($column, Operator::OP_LT, $value);
+                } else {
+                    return new Operator($column, Operator::OP_GT, $value);
+                }
+            } elseif ($first === "<") {
+                if ($negative) {
+                    return new Operator($column, Operator::OP_GT, $value);
+                } else {
+                    return new Operator($column, Operator::OP_LT, $value);
+                }
+            } elseif ($first === "!") {
+                if ($negative) {
+                    return new Operator($column, Operator::OP_EQ, $value);
+                } else {
+                    return new Operator($column, Operator::OP_NE, $value);
+                }
+            }
+        }
+        if ($negative) {
+            return new Operator($column, Operator::OP_NE, $value);
+        } else {
+            return new Operator($column, Operator::OP_EQ, $value);
+        }
     }
 }
