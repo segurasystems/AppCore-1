@@ -53,7 +53,8 @@ abstract class Service
         return $this->tableAccessLayer;
     }
 
-    protected function prepModelForSave(AbstractModel $model) {
+    protected function prepModelForSave(AbstractModel $model)
+    {
         return $model;
     }
 
