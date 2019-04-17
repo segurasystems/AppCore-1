@@ -43,11 +43,12 @@ abstract class Service
 
     }
 
-    protected final function getSelect(){
-        return $this->getAccessLayer()->getSelect();
+    protected final function getSelect(string $alias = null): Select
+    {
+        return $this->getAccessLayer()->getSelect($alias);
     }
 
-    protected final function getAccessLayer() : TableAccessLayer
+    protected final function getAccessLayer(): TableAccessLayer
     {
         return $this->tableAccessLayer;
     }
@@ -200,7 +201,7 @@ abstract class Service
         } elseif (!empty($predicates)) {
             $select->where(new PredicateSet($predicates, $filter->getCombination()));
         }
-        if(!empty($filter->getColumns())){
+        if (!empty($filter->getColumns())) {
             $select->columns($filter->getColumns());
         }
         return $select;

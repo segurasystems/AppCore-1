@@ -30,8 +30,15 @@ abstract class TableAccessLayer
         $this->_zendFeatures = $zendfeatures;
     }
 
-    public final function getSelect(){
-        return new Select($this->getTable());
+    public final function getSelect(string $alias = null): Select
+    {
+        if(empty($alias)){
+            $table = $this->getTable();
+        } else {
+            $table = [$alias => $this->getTable()];
+        }
+        $select = new Select();
+        return $select->from($table);
     }
 
     public final function getTable()
